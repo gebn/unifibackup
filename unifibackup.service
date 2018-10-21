@@ -1,0 +1,15 @@
+[Unit]
+Description=A utility to upload Unifi Controller backups to S3
+Documentation=https://github.com/gebn/unifibackup/blob/master/README.md
+After=network.target
+
+[Service]
+Type=simple
+User=unifi
+ExecStart=/usr/local/bin/unifibackup -bucket <changeme>
+Environment=AWS_REGION=<e.g. eu-west-2>
+#Environment=AWS_ACCESS_KEY_ID=<changeme>
+#Environment=AWS_SECRET_ACCESS_KEY=<changeme>
+
+[Install]
+WantedBy=multi-user.target

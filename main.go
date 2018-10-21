@@ -89,7 +89,7 @@ func uploadProcessor(sess *session.Session) func(string) error {
 	return func(path string) error {
 		f, err := os.Open(path)
 		if err != nil {
-			return fmt.Errorf("failed to open %v for uploading: %v", path, err)
+			return fmt.Errorf("Failed to open %v for uploading: %v", path, err)
 		}
 
 		base := filepath.Base(path)
@@ -103,9 +103,9 @@ func uploadProcessor(sess *session.Session) func(string) error {
 		elapsed := time.Since(start)
 		f.Close()
 		if err != nil {
-			return fmt.Errorf("failed to upload %v: %v", base, err)
+			return fmt.Errorf("Failed to upload %v: %v", base, err)
 		}
-		log.Printf("uploaded %v in %v\n", base, elapsed.Round(time.Millisecond))
+		log.Printf("Uploaded %v in %v\n", base, elapsed.Round(time.Millisecond))
 
 		if previous != "" { // delete old backup *after* uploading new one
 			_, err := svc.DeleteObject(&s3.DeleteObjectInput{
@@ -115,7 +115,7 @@ func uploadProcessor(sess *session.Session) func(string) error {
 			if err != nil {
 				// too many backups is a relatively benign failure, so
 				// continue as normal
-				log.Printf("failed to delete %v: %v", previous, err)
+				log.Printf("Failed to delete %v: %v\n", previous, err)
 			}
 		}
 		previous = key
@@ -149,6 +149,8 @@ func upload(sess *session.Session, backups <-chan string, done <-chan struct{}, 
 }
 
 func main() {
+	log.SetFlags(0) // systemd already prefixes logs with the timestamp
+
 	flag.Parse()
 	if *bucket == "" {
 		log.Fatalln("A bucket name must be specified with -bucket")
@@ -165,12 +167,12 @@ func main() {
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatalln("failed to create watcher:", err)
+		log.Fatalln("Failed to create watcher:", err)
 	}
 
 	err = watcher.Add(*backupDir)
 	if err != nil {
-		log.Fatalf("failed to add watcher for %v: %v\n", *backupDir, err)
+		log.Fatalf("Failed to add watcher for %v: %v\n", *backupDir, err)
 	}
 
 	sess := session.Must(session.NewSession())
@@ -182,11 +184,11 @@ wait:
 	for {
 		select {
 		case err := <-watcher.Errors:
-			log.Println("watcher error:", err)
+			log.Println("Watcher error:", err)
 			close(done)
 			break wait
 		case err := <-syncErrors:
-			log.Println("sync error:", err)
+			log.Println("Sync error:", err)
 			close(done)
 			break wait
 		case <-done:
