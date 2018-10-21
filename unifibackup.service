@@ -7,9 +7,13 @@ After=network.target
 Type=simple
 User=unifi
 ExecStart=/usr/local/bin/unifibackup -bucket <changeme>
-Environment=AWS_REGION=<e.g. eu-west-2>
-#Environment=AWS_ACCESS_KEY_ID=<changeme>
-#Environment=AWS_SECRET_ACCESS_KEY=<changeme>
+
+# region of the S3 bucket passed in above
+Environment=AWS_REGION=
+
+# if running in EC2, use an instance profile
+#Environment=AWS_ACCESS_KEY_ID=
+#Environment=AWS_SECRET_ACCESS_KEY=
 
 [Install]
 WantedBy=multi-user.target
