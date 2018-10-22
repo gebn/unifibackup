@@ -11,7 +11,8 @@ ExecStart=/usr/local/bin/unifibackup -bucket <changeme>
 # region of the S3 bucket passed in above
 Environment=AWS_REGION=
 
-# if running in EC2, use an instance profile
+# ideally, these should not have to be provided, as the AWS SDK will retrieve
+# credentials from elsewhere (e.g. via the instance profile if running in EC2)
 #Environment=AWS_ACCESS_KEY_ID=
 #Environment=AWS_SECRET_ACCESS_KEY=
 
