@@ -8,33 +8,59 @@ Enable auto backup under `Settings > Auto Backup` on your controller. Set the oc
 
 ## Systemd Setup
 
-The executable is intended to run under systemd. A service file is included; before proceeding with the commands below, open this up in your favourite editor to set at least `AWS_REGION`, and possibly an access key, depending on your environment (more instructions in the file). Once this is done, execute the following as `root`:
+The executable is intended to run under systemd. The following instructions detail how to set this up
 
-    cp unifibackup.service /etc/systemd/system
-    systemctl daemon-reload                     # pick up changes
-    systemctl enable unifibackup.service        # start on boot
-    systemctl start unifibackup.service         # start right now
-    systemctl status unifibackup.service        # check running smoothly (look for "active (running)")
+ 1. Open up `unifibackup.service` in your favourite editor.
+     a) Change the bucket to the one you want to upload to (see *IAM Policy* below for required permissions).
+     b) Set `AWS_REGION` to the region of the bucket above.
+     c) If not using an instance profile, and credentials are not configured elsewhere, set the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
+ 2. Execute the following as `root`:
 
-Running the final command after a few hours should yield output similar to this:
+        cp unifibackup.service /etc/systemd/system
+        systemctl daemon-reload                     # pick up changes
+        systemctl enable unifibackup.service        # start on boot
+        systemctl start unifibackup.service         # start right now
+        systemctl status unifibackup.service        # check running smoothly (look for "active (running)")
 
-    $ sudo systemctl status unifibackup.service
-    ● unifibackup.service - A utility to upload Unifi Controller backups to S3
-       Loaded: loaded (/etc/systemd/system/unifibackup.service; enabled; vendor preset: enabled)
-       Active: active (running) since Sun 2018-10-21 22:50:03 UTC; 20h ago
-         Docs: https://github.com/gebn/unifibackup/blob/master/README.md
-     Main PID: 13790 (unifibackup)
-        Tasks: 10 (limit: 4915)
-       CGroup: /system.slice/unifibackup.service
-               └─13790 /usr/local/bin/unifibackup -bucket bucket.example.com
+    Running the final command after a few hours should yield output similar to this:
 
-    Oct 22 10:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1020_1540203600005.unf in 551ms
-    Oct 22 11:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1120_1540207200006.unf in 807ms
-    Oct 22 12:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1220_1540210800007.unf in 559ms
-    Oct 22 13:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1320_1540214400006.unf in 701ms
-    Oct 22 14:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1420_1540218000007.unf in 732ms
-    Oct 22 15:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1520_1540221600006.unf in 639ms
-    Oct 22 16:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1620_1540225200005.unf in 495ms
-    Oct 22 17:20:06 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1720_1540228800007.unf in 710ms
-    Oct 22 18:20:06 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1820_1540232400008.unf in 616ms
-    Oct 22 19:20:06 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1920_1540236000007.unf in 549ms
+        $ sudo systemctl status unifibackup.service
+        ● unifibackup.service - A utility to upload Unifi Controller backups to S3
+           Loaded: loaded (/etc/systemd/system/unifibackup.service; enabled; vendor preset: enabled)
+           Active: active (running) since Sun 2018-10-21 22:50:03 UTC; 20h ago
+             Docs: https://github.com/gebn/unifibackup/blob/master/README.md
+         Main PID: 13790 (unifibackup)
+            Tasks: 10 (limit: 4915)
+           CGroup: /system.slice/unifibackup.service
+                   └─13790 /usr/local/bin/unifibackup -bucket bucket.example.com
+
+        Oct 22 10:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1020_1540203600005.unf in 551ms
+        Oct 22 11:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1120_1540207200006.unf in 807ms
+        Oct 22 12:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1220_1540210800007.unf in 559ms
+        Oct 22 13:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1320_1540214400006.unf in 701ms
+        Oct 22 14:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1420_1540218000007.unf in 732ms
+        Oct 22 15:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1520_1540221600006.unf in 639ms
+        Oct 22 16:20:05 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1620_1540225200005.unf in 495ms
+        Oct 22 17:20:06 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1720_1540228800007.unf in 710ms
+        Oct 22 18:20:06 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1820_1540232400008.unf in 616ms
+        Oct 22 19:20:06 ip-10-22-16-5 unifibackup[13790]: Uploaded autobackup_5.9.29_20181022_1920_1540236000007.unf in 549ms
+
+## IAM Policy
+
+Regardless of how the daemon runs, it requires put and delete permissions on the destination bucket. This can be achieved with the following IAM policy:
+
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "s3:PutObject",
+                    "s3:DeleteObject"
+                ],
+                "Resource": "arn:aws:s3:::<bucket>/<prefix>*"
+            }
+        ]
+    }
+
+*N.B. if using EC2, an [instance profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html) can make management much easier.*
