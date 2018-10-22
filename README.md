@@ -2,6 +2,10 @@
 
 A daemon that monitors a UniFi Controller's `autobackup` directory, uploading new backups to S3 as soon as they are ready.
 
+## Controller Setup
+
+Enable auto backup under `Settings > Auto Backup` on your controller. Set the occurrence to as often as your internet connection can take - the more frequent, the less data you are likely to lose. You only need to retain one (i.e. the latest) backup, however you may want to keep around more; this daemon will work correctly regardless, as it only pays attention to new files.
+
 ## Systemd Setup
 
 The executable is intended to run under systemd. A service file is included; before proceeding with the commands below, open this up in your favourite editor to set at least `AWS_REGION`, and possibly an access key, depending on your environment (more instructions in the file). Once this is done, execute the following as `root`:
