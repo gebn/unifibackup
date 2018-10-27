@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -17,12 +16,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
-	backupDir = flag.String("dir", "/var/lib/unifi/backup/autobackup", "path of the autobackup directory")
-	bucket    = flag.String("bucket", "", "name of the S3 bucket to upload to (required)")
-	prefix    = flag.String("prefix", "unifi/", "prepended to the file name to form the object key of backups")
+	backupDir = kingpin.Flag("dir", "path of the autobackup directory").Default("/var/lib/unifi/backup/autobackup").ExistingDir()
+	bucket    = kingpin.Flag("bucket", "name of the S3 bucket to upload to").Required().String()
+	prefix    = kingpin.Flag("prefix", "prepended to the file name to form the object key of backups").Default("unifi/").String()
 )
 
 /*
@@ -151,10 +152,7 @@ func upload(sess *session.Session, backups <-chan string, done <-chan struct{}, 
 func main() {
 	log.SetFlags(0) // systemd already prefixes logs with the timestamp
 
-	flag.Parse()
-	if *bucket == "" {
-		log.Fatalln("A bucket name must be specified with -bucket")
-	}
+	kingpin.Parse()
 
 	sigs := make(chan os.Signal)
 	signal.Notify(sigs, syscall.SIGINT)
