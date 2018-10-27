@@ -10,17 +10,18 @@ Enable auto backup under `Settings > Auto Backup` on your controller. Set the oc
 
 The executable is intended to run under systemd. The following instructions detail how to set this up
 
- 1. Open up `unifibackup.service` in your favourite editor.
-     a) Change the bucket to the one you want to upload to (see *IAM Policy* below for required permissions).
-     b) Set `AWS_REGION` to the region of the bucket above.
-     c) If not using an instance profile, and credentials are not configured elsewhere, set the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
- 2. Execute the following as `root`:
+1. Open up `unifibackup.service` in your favourite editor.
+   1. Change the bucket to the one you want to upload to (see *IAM Policy* below for required permissions).
+   2. Set `AWS_REGION` to the region of the bucket above.
+   3. If not using an instance profile, and credentials are not configured elsewhere, set the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
 
-        cp unifibackup.service /etc/systemd/system
-        systemctl daemon-reload                     # pick up changes
-        systemctl enable unifibackup.service        # start on boot
-        systemctl start unifibackup.service         # start right now
-        systemctl status unifibackup.service        # check running smoothly (look for "active (running)")
+2. Execute the following as `root`:
+
+       cp unifibackup.service /etc/systemd/system
+       systemctl daemon-reload                     # pick up changes
+       systemctl enable unifibackup.service        # start on boot
+       systemctl start unifibackup.service         # start right now
+       systemctl status unifibackup.service        # check running smoothly (look for "active (running)")
 
 Running the final `status` command again after a few multiples of the backup frequency should show the daemon successfully uploading new files:
 
