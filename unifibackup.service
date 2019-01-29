@@ -6,7 +6,7 @@ After=network.target
 [Service]
 Type=simple
 User=unifi
-ExecStart=/usr/local/bin/unifibackup -bucket <changeme>
+ExecStart=/usr/local/bin/unifibackup --bucket <changeme>
 
 # region of the S3 bucket passed in above
 Environment=AWS_REGION=
