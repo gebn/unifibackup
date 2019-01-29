@@ -178,20 +178,14 @@ func main() {
 	var wg sync.WaitGroup
 	syncErrors := upload(sess, match(watcher.Events, &wg), done, &wg)
 
-wait:
-	for {
-		select {
-		case err := <-watcher.Errors:
-			log.Println("Watcher error:", err)
-			close(done)
-			break wait
-		case err := <-syncErrors:
-			log.Println("Sync error:", err)
-			close(done)
-			break wait
-		case <-done:
-			break wait
-		}
+	select {
+	case err := <-watcher.Errors:
+		log.Println("Watcher error:", err)
+		close(done)
+	case err := <-syncErrors:
+		log.Println("Sync error:", err)
+		close(done)
+	case <-done:
 	}
 
 	watcher.Close()
