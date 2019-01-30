@@ -108,7 +108,7 @@ func uploadProcessor(sess *session.Session) func(string) error {
 		if err != nil {
 			return fmt.Errorf("Failed to upload %v: %v", base, err)
 		}
-		log.Printf("Uploaded %v in %v\n", base, elapsed.Round(time.Millisecond))
+		log.Printf("Uploaded %v in %v", base, elapsed.Round(time.Millisecond))
 
 		if previous != "" { // delete old backup *after* uploading new one
 			_, err := svc.DeleteObject(&s3.DeleteObjectInput{
@@ -118,7 +118,7 @@ func uploadProcessor(sess *session.Session) func(string) error {
 			if err != nil {
 				// too many backups is a relatively benign failure, so
 				// continue as normal
-				log.Printf("Failed to delete %v: %v\n", previous, err)
+				log.Printf("Failed to delete %v: %v", previous, err)
 			}
 		}
 		previous = key
@@ -171,7 +171,7 @@ func main() {
 
 	err = watcher.Add(*backupDir)
 	if err != nil {
-		log.Fatalf("Failed to add watcher for %v: %v\n", *backupDir, err)
+		log.Fatalf("Failed to add watcher for %v: %v", *backupDir, err)
 	}
 
 	var wg sync.WaitGroup
