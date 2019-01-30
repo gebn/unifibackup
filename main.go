@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -155,7 +154,7 @@ func main() {
 	kingpin.Parse()
 
 	sigs := make(chan os.Signal)
-	signal.Notify(sigs, syscall.SIGINT)
+	signal.Notify(sigs, os.Interrupt)
 	done := make(chan struct{})
 	go func() {
 		<-sigs
