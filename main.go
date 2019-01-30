@@ -158,7 +158,6 @@ func main() {
 
 	sigs := make(chan os.Signal)
 	signal.Notify(sigs, syscall.SIGINT)
-
 	done := make(chan struct{})
 	go func() {
 		<-sigs
@@ -175,9 +174,8 @@ func main() {
 		log.Fatalf("Failed to add watcher for %v: %v\n", *backupDir, err)
 	}
 
-	sess := session.Must(session.NewSession())
-
 	var wg sync.WaitGroup
+	sess := session.Must(session.NewSession())
 	syncErrors := upload(sess, match(watcher.Events, &wg), done, &wg)
 
 	select {
