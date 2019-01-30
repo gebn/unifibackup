@@ -46,11 +46,7 @@ func match(events <-chan fsnotify.Event, wg *sync.WaitGroup) <-chan string {
 		defer wg.Done()
 		state := 0
 		var lastCreated string
-		for {
-			event, ok := <-events
-			if !ok {
-				return
-			}
+		for event := range events {
 			switch state {
 			// looking for a create file event
 			case 0:
