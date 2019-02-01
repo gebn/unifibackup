@@ -6,6 +6,8 @@ After=network.target
 [Service]
 Type=simple
 User=unifi
+
+# specify --prefix to override the bucket prefix from "unifi/"
 ExecStart=/usr/local/bin/unifibackup --bucket <changeme>
 
 # region of the S3 bucket passed in above
