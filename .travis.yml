@@ -1,0 +1,35 @@
+sudo: false
+language: go  # N.B. Bazel downloads its own Go SDK, so we don't rely on Travis keeping up to date
+env:
+  global:
+    - BAZEL_VERSION=0.22.0
+before_install:
+  - |
+    wget -O install.sh "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
+    chmod +x install.sh
+install:
+  - |
+    ./install.sh --user
+    bazel shutdown  # prevents "WARNING: Running Bazel server needs to be killed, because the startup options are different."
+    rm -f install.sh
+script:
+  - |
+    bazel \
+      --host_jvm_args=-Xmx8000m \
+      --host_jvm_args=-Xms8000m \
+      build \
+      --config=ci \
+      --noshow_progress \
+      --noshow_loading_progress \
+      --local_resources=8500,2,1.0 \
+      :plexbackup
+  - bazel-bin/linux_amd64_stripped/unifibackup --version
+deploy:
+  provider: releases
+  file: bazel-bin/linux_amd64_stripped/unifibackup
+  skip_cleanup: true
+  api_key:
+    secure: e7miqEj4xJCsjomxmRq5CU5k2wNae+uFRvvwd9qeLv5K83iIeun9YM7x+ZqgxZSDqfsWoxzmlOEv9wbJFB/LAVkzOQR0NMhI2tEQWIMO1KjMd0f4XZnZSVnh0b9NCTCGKVQ+XyCLkE1elW3eehF3H4ZQtF/6e3okvuP8GYj6NRvL+wPyOUvQKHK+K5y1yeeFC49fOLN9II4UYBvpy5rboiZBfLkwpNMTxM+9We+XY/uXlYaqC1MQn3BwL2ryk7hJiVaYCi9dB/fhfgao8jUSkt3IArq5Aqqn1NgJOVgtlAdxjMkTOqkIaebF+B64Kn8LArthnCN++gJIQReL01aSysVqf7v3SxzpJInRk3p6QyRFNjo+KlXz3woPusemoS9IKIOteuxjFZh4iy4l7atgHvM08hYFi6hJDMT9H7TgBN4+k4+mmmlHksMOiZ0BQajOWB7JexrBavUGUD4XcrrCIm++REnf/KCxi7DJqFHnXvff+uhHos7XsI6pRxbnOc5Nj96/GgpE/F8F6Gfe5ai6d2pWQ1D+BX2WEvk1ppu56Ee2TX1iN7/xbNJ+uoYGn9lK/79qXiEiFYHCsfOLYxysvi41CyUGaewbZdj6xu70SzZgvFjLcN+IHjV2CCzHye22FxE1bEqraECavNHUP0f8M3XgaFKKziEL2s5tJ+iermo=
+  on:
+    repo: gebn/unifibackup
+    tags: true

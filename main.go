@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/fsnotify/fsnotify"
+	"github.com/gebn/go-stamp"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -151,6 +152,7 @@ func upload(sess *session.Session, backups <-chan string, done <-chan struct{}, 
 func main() {
 	log.SetFlags(0) // systemd already prefixes logs with the timestamp
 
+	kingpin.Version(stamp.String())
 	kingpin.Parse()
 
 	sigs := make(chan os.Signal)
