@@ -1,5 +1,9 @@
 # UniFi Backup
 
+[![Build Status](https://travis-ci.org/gebn/unifibackup.svg?branch=master)](https://travis-ci.org/gebn/unifibackup)
+[![GoDoc](https://godoc.org/github.com/gebn/unifibackup?status.svg)](https://godoc.org/github.com/gebn/unifibackup)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gebn/unifibackup)](https://goreportcard.com/report/github.com/gebn/unifibackup)
+
 A daemon that monitors a UniFi Controller's `autobackup` directory, uploading new backups to S3 as soon as they are ready.
 
 ## Controller Setup
