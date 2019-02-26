@@ -10,8 +10,8 @@ User=unifi
 # specify --prefix to override the bucket prefix from "unifi/"
 ExecStart=/usr/local/bin/unifibackup --bucket <changeme>
 
-# region of the S3 bucket passed in above
-Environment=AWS_REGION=
+# region of the S3 bucket passed in above, e.g. eu-west-2
+Environment=AWS_REGION=<changeme>
 
 # ideally, these should not have to be provided, as the AWS SDK will retrieve
 # credentials from elsewhere (e.g. via the instance profile if running in EC2)
