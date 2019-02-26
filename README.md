@@ -12,7 +12,7 @@ Enable auto backup under `Settings > Auto Backup` on your controller. Set the oc
 
 ## Systemd Setup
 
-The executable is intended to run under systemd. The following instructions detail how to set this up
+The executable is intended to run under systemd. The following instructions detail how to set up the service.
 
 1. Download the [latest](https://github.com/gebn/unifibackup/releases/latest) binary to `/usr/bin/local`, and ensure it is executable.
 
