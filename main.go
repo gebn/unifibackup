@@ -19,13 +19,13 @@ import (
 )
 
 var (
-	backupDir = kingpin.Flag("dir", "path of the autobackup directory").
+	backupDir = kingpin.Flag("dir", "Path of the autobackup directory.").
 			Default("/var/lib/unifi/backup/autobackup").
 			String() // we don't use ExistingDir() as that requires a valid dir to use `--version`
-	bucket = kingpin.Flag("bucket", "name of the S3 bucket to upload to").
+	bucket = kingpin.Flag("bucket", "Name of the S3 bucket to upload to.").
 		Required().
 		String()
-	prefix = kingpin.Flag("prefix", "prepended to the file name to form the object key of backups").
+	prefix = kingpin.Flag("prefix", "Prepended to the file name to form the object key of backups.").
 		Default("unifi/").
 		String()
 )
