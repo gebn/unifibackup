@@ -6,14 +6,14 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
+
+	"github.com/gebn/unifibackup/monitor"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/fsnotify/fsnotify"
 	"github.com/gebn/go-stamp"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -29,54 +29,6 @@ var (
 		Default("unifi/").
 		String()
 )
-
-/*
-match implements a simple state machine to recognise when a backup is
-completed. When it is, the path in the event (relative or absolute, depending
-on the path given to the monitor) is put on the returned channel. These files are
-safe to read immediately. The goroutine will stop when the input channel is
-closed.
-*/
-func match(events <-chan fsnotify.Event, wg *sync.WaitGroup) <-chan string {
-	complete := make(chan string)
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		state := 0
-		var lastCreated string
-		for event := range events {
-			switch state {
-			// looking for a create file event
-			case 0:
-				if event.Op != fsnotify.Create {
-					continue
-				}
-				lastCreated = event.Name
-				state = 1
-			// observing writes; waiting for one to the meta file
-			case 1:
-				if event.Op != fsnotify.Write {
-					// reset
-					state = 0
-					continue
-				}
-				if strings.HasSuffix(event.Name, ".unf") {
-					// new backup file is being written; we see >5000 of
-					// these events before it finishes
-					continue
-				}
-				if strings.HasSuffix(event.Name, ".json") {
-					// meta file is being written, which means backup file
-					// is complete, so we can put it on the channel and
-					// reset
-					complete <- lastCreated
-					state = 0
-				}
-			}
-		}
-	}()
-	return complete
-}
 
 /*
 uploadProcessor encapsulates the upload and delete logic. The returned
@@ -163,23 +115,18 @@ func main() {
 		close(done)
 	}()
 
-	watcher, err := fsnotify.NewWatcher()
+	monitor, err := monitor.New(*backupDir)
 	if err != nil {
-		log.Fatalln("Failed to create watcher:", err)
-	}
-
-	err = watcher.Add(*backupDir)
-	if err != nil {
-		log.Fatalf("Failed to add watcher for %v: %v", *backupDir, err)
+		log.Fatal(err)
 	}
 
 	var wg sync.WaitGroup
 	sess := session.Must(session.NewSession())
-	syncErrors := upload(sess, match(watcher.Events, &wg), done, &wg)
+	syncErrors := upload(sess, monitor.Backups, done, &wg)
 
 	select {
-	case err := <-watcher.Errors:
-		log.Println("Watcher error:", err)
+	case err := <-monitor.Errors:
+		log.Println("Monitor error:", err)
 		close(done)
 	case err := <-syncErrors:
 		log.Println("Sync error:", err)
@@ -187,6 +134,8 @@ func main() {
 	case <-done:
 	}
 
-	watcher.Close()
+	if err = monitor.Close(); err != nil {
+		log.Printf("Failed to close monitor: %v", err)
+	}
 	wg.Wait()
 }
