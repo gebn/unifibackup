@@ -22,5 +22,7 @@ go_library(
 go_binary(
     name = "unifibackup",
     embed = [":go_default_library"],
+    pure = "on",
+    static = "on",
     visibility = ["//visibility:public"],
 )
