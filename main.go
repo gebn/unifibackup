@@ -31,8 +31,7 @@ func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, done <-ch
 	for {
 		select {
 		case path := <-monitor.Backups:
-			_, err := uploader.Upload(path)
-			if err != nil {
+			if _, err := uploader.Upload(path); err != nil {
 				return fmt.Errorf("upload error: %v", err)
 			}
 		case err := <-monitor.Errors:
