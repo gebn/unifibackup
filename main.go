@@ -152,7 +152,7 @@ func upload(sess *session.Session, backups <-chan string, done <-chan struct{}, 
 func main() {
 	log.SetFlags(0) // systemd already prefixes logs with the timestamp
 
-	kingpin.Version(stamp.String())
+	kingpin.Version(stamp.Summary())
 	kingpin.Parse()
 
 	sigs := make(chan os.Signal)

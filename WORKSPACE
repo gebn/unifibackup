@@ -17,7 +17,7 @@ gazelle_dependencies()
 
 go_repository(
     name = "com_github_gebn_go_stamp",
-    tag = "1.0.0",
+    tag = "v2.0.0",
     importpath = "github.com/gebn/go-stamp",
 )
 go_repository(
