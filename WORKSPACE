@@ -27,7 +27,7 @@ go_repository(
 )
 go_repository(
     name = "com_github_aws_aws_sdk_go",
-    tag = "v1.16.26",
+    tag = "v1.18.3",
     importpath = "github.com/aws/aws-sdk-go",
 )
 go_repository(
