@@ -5,6 +5,7 @@ After=network.target
 
 [Service]
 User=unifi
+Restart=always
 
 # --prefix to override the bucket prefix from "unifi/"
 # --metrics :<port> to expose metrics in Prometheus format
