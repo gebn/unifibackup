@@ -1,0 +1,44 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+readonly NAME=plexbackup
+readonly TARGET="//:$NAME"
+
+readonly PLATFORMS=(
+    # <Bazel toolchain name>,<output binary name>,<suffix for binary>
+	linux_amd64,$NAME,linux-x86_64
+	windows_amd64,$NAME.exe,windows-x86_64
+	darwin_amd64,$NAME,darwin-x86_64
+)
+
+readonly VERSION=$(git describe --always --tags --dirty)
+readonly TOOLCHAIN_PREFIX="@io_bazel_rules_go//go/toolchain:"
+
+main() {
+    local output_dir="$1"
+    echo "Creating $VERSION binaries for ${#PLATFORMS[@]} platforms in $output_dir..."
+    for platform in "${PLATFORMS[@]}"; do
+        IFS=',' read toolchain binary platform <<< "$platform"
+        bazel \
+          --host_jvm_args=-Xmx7000m \
+          --host_jvm_args=-Xms7000m \
+          build \
+          --config=ci \
+          --noshow_progress \
+          --noshow_loading_progress \
+          --local_resources=7500,2,1.0 \
+          "$TARGET" \
+          --platforms "${TOOLCHAIN_PREFIX}$toolchain"
+        mv "bazel-bin/${toolchain}_static_pure_stripped/${binary}" "$output_dir/$NAME-$VERSION-$platform"
+    done
+}
+
+if [ $# -eq 0 ]; then
+    echo "Usage: release <output dir>" >&2
+    exit 1
+fi
+
+main "$1"

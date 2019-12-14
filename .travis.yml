@@ -26,11 +26,15 @@ script:
       --local_resources=7500,2,1.0 \
       //...
   - bazel-bin/linux_amd64_static_pure_stripped/unifibackup --version
+before_deploy:
+  - mkdir out
+  - bin/release out
 deploy:
   provider: releases
-  file: bazel-bin/linux_amd64_static_pure_stripped/unifibackup
-  skip_cleanup: true
-  api_key:
+  edge: true
+  file_glob: true
+  file: out/*
+  token:
     secure: FDVGVW1ZfdGl0RXt3H9mZHEnDbEsEs4zR2cr7EZn4WfNwLDNyJpalCG/+qhElerk3jSn8YrWeqMN1Yn+bpwgSiR9jD53GZGG3QFnvVpnvcTSKrQWkZfDtreJ3etXhdtkKqChDWKM353TQSvlCHAlRmzZ6kZUK+ENqOHA5rBbe9VUJyOG/oUYukzw6IzJmE+v1+AtCRK4YkE+WicvTzw6eeXCqR8+WgGfh8dVxF2sKln0ApgMn8Ax7A9tzKLJBqVDHqr4E7F3HtzFGZk94bS4e4Bu75vXdEUYmt3pxQEWAh+/ChY6wwiO+qech5/b5fWQ44gLpls0cfIgjNw+zmq8rp/sp7jytGm3e2nXb1RUrpOKa5LpdmYB7qC4kpGnfs1OVN8ikT797EfqV5kHNMmIKCdEWKYax0q9CrZ2g9evJXDlF4BayCeOrGycL6kxGhPjqsgdliCI3aOia91nz2NaA09H2PBGX1TAnQLV6R1DIpW/9unmYJTeFqnW4yo8F25e6fUdSOyb9jp3Ne2ybPJ7mUwC3WwwrfOt91wfp0dgBbRKhJ4KOnrj+e8JAtDWkaWw1/+c8xiaC3RGbjKHK8rPnz//BPxznH5OLFKU0n/FgEKwxRmmdJhos9PeMnZidpiseq1R/UhrYmUHTFGVnLV3LKJsv9IfThbQl88gd6Cwaaw=
   on:
     repo: gebn/unifibackup
