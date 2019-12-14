@@ -42,6 +42,7 @@ func New(dir string) (*Monitor, error) {
 		return nil, fmt.Errorf("failed to create watcher: %v", err)
 	}
 	if err = watcher.Add(dir); err != nil {
+		watcher.Close()
 		return nil, fmt.Errorf("failed to watch %v: %v", dir, err)
 	}
 	return &Monitor{
