@@ -2,8 +2,8 @@ sudo: false
 language: go  # N.B. Bazel downloads its own Go SDK, so we don't rely on Travis keeping up to date
 env:
   global:
-    - BAZEL_VERSION=0.23.2
-    - BAZEL_SHA256=5e77a0c06b45b12126e51a5fab13c89dfe6a356f86e1d27299dfac8e8746a7e9
+    - BAZEL_VERSION=1.2.1
+    - BAZEL_SHA256=ae6249e25b0f5a06d79fad90325477dd56275657951cf7aa6a3cbcd79fc4d749
 before_install:
   - |
     wget -O install.sh "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
@@ -17,13 +17,13 @@ install:
 script:
   - |
     bazel \
-      --host_jvm_args=-Xmx8000m \
-      --host_jvm_args=-Xms8000m \
+      --host_jvm_args=-Xmx7000m \
+      --host_jvm_args=-Xms7000m \
       build \
       --config=ci \
       --noshow_progress \
       --noshow_loading_progress \
-      --local_resources=8500,2,1.0 \
+      --local_resources=7500,2,1.0 \
       //...
   - bazel-bin/linux_amd64_static_pure_stripped/unifibackup --version
 deploy:
