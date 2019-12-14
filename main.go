@@ -69,6 +69,6 @@ func main() {
 	}
 
 	if err = monitor.Close(); err != nil {
-		log.Printf("Failed to close monitor: %v", err)
+		log.Printf("failed to close monitor: %v", err)
 	}
 }

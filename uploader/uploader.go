@@ -43,10 +43,10 @@ func (u *Uploader) Upload(path string) (*s3manager.UploadOutput, error) {
 		Body:   f,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("Failed to upload %v: %v", base, err)
+		return nil, fmt.Errorf("failed to upload %v: %v", base, err)
 	}
 	elapsed := time.Since(start)
-	log.Printf("Uploaded %v in %v", base, elapsed.Round(time.Millisecond))
+	log.Printf("uploaded %v in %v", base, elapsed.Round(time.Millisecond))
 
 	if u.previousKey != "" { // delete old backup *after* uploading new one
 		_, err := u.Manager.S3.DeleteObject(&s3.DeleteObjectInput{
@@ -54,9 +54,9 @@ func (u *Uploader) Upload(path string) (*s3manager.UploadOutput, error) {
 			Key:    &u.previousKey,
 		})
 		if err != nil {
-			// too many backups is a relatively benign failure, so
-			// continue as normal
-			log.Printf("Failed to delete %v: %v", u.previousKey, err)
+			// too many backups is a relatively benign failure, so continue as
+			// normal
+			log.Printf("failed to delete %v: %v", u.previousKey, err)
 		}
 	}
 	u.previousKey = key

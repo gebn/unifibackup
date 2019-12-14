@@ -1,6 +1,6 @@
-// Package monitor identifies new backups as they become available. It
-// watches a given backup directory, determining when a backup completes
-// using a small state machine.
+// Package monitor identifies new backups as they become available. It watches a
+// given backup directory, determining when a backup completes using a small
+// state machine.
 package monitor
 
 import (
@@ -16,26 +16,25 @@ type Monitor struct {
 	// watcher is the underlying handle, maintained so it can be closed.
 	watcher *fsnotify.Watcher
 
-	// Backups contains paths to newly completed backups. These paths
-	// will be relative or absolute, depending on the path provided
-	// when creating the monitor. Backups are safe to read immediately.
+	// Backups contains paths to newly completed backups. These paths will be
+	// relative or absolute, depending on the path provided when creating the
+	// monitor. Backups are safe to read immediately.
 	Backups <-chan string
 
-	// Errors contains errors returned by the underlying filesystem
-	// watcher.
+	// Errors contains errors returned by the underlying filesystem watcher.
 	Errors <-chan error
 }
 
-// Close terminates the underlying filesystem watcher, returning any
-// error encountered, or nil if the close was successful. Regardless,
-// the monitor should be considered unusable.
+// Close terminates the underlying filesystem watcher, returning any error
+// encountered, or nil if the close was successful. Regardless, the monitor
+// should be considered unusable.
 func (m *Monitor) Close() error {
 	return m.watcher.Close()
 }
 
-// New creates a new monitor that watches for and returns new UniFi
-// backups. If no error occurs while setting up the watcher, the
-// provided directory will be monitored until Close() is called.
+// New creates a new monitor that watches for and returns new UniFi backups. If
+// no error occurs while setting up the watcher, the provided directory will be
+// monitored until Close() is called.
 func New(dir string) (*Monitor, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -52,9 +51,9 @@ func New(dir string) (*Monitor, error) {
 	}, nil
 }
 
-// filter determines when backups complete using the stream of filesystem
-// events from the backup directory. Completed backups are placed on the
-// returned channel.
+// filter determines when backups complete using the stream of filesystem events
+// from the backup directory. Completed backups are placed on the returned
+// channel.
 func filter(events <-chan fsnotify.Event) <-chan string {
 	complete := make(chan string)
 	// we don't bother with a WaitGroup as there is never cleanup to do
