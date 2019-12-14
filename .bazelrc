@@ -1,4 +1,5 @@
 build --workspace_status_command=bin/workspace_status
+build --stamp
 
 build:ci --verbose_failures
 build:ci --sandbox_debug
