@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-readonly NAME=plexbackup
+readonly NAME=unifibackup
 readonly TARGET="//:$NAME"
 
 readonly PLATFORMS=(
