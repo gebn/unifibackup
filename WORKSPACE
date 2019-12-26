@@ -73,25 +73,29 @@ go_repository(
 go_repository(
     name = "com_github_prometheus_common",
     importpath = "github.com/prometheus/common",
-    tag = "v0.7.0",
+    version = "v0.7.0",
+    sum = "h1:L+1lyG48J1zAQXA3RBX/nG/B3gjlHq0zTt2tlbJLyCY=",
 )
 
 go_repository(
     name = "com_github_beorn7_perks",
     importpath = "github.com/beorn7/perks",
-    tag = "v1.0.1",
+    version = "v1.0.1",
+    sum = "h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=",
 )
 
 go_repository(
     name = "com_github_prometheus_client_model",
     importpath = "github.com/prometheus/client_model",
-    commit = "v0.1.0",
+    version = "v0.1.0",
+    sum = "h1:ElTg5tNp4DqfV7UQjDqv2+RJlNzsDtvNAWccbItceIE=",
 )
 
 go_repository(
     name = "com_github_prometheus_procfs",
     importpath = "github.com/prometheus/procfs",
-    tag = "v0.0.8",
+    version = "v0.0.8",
+    sum = "h1:+fpWZdT24pJBiqJdAwYBjPSk+5YmQzYNPYzQsdzLkt8=",
 )
 
 go_repository(
