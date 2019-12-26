@@ -15,6 +15,10 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
+const (
+	help = "Watches for new UniFi Controller backups and uploads them to S3."
+)
+
 var (
 	backupDir = kingpin.Flag("dir", "Path of the autobackup directory.").
 			Default("/var/lib/unifi/backup/autobackup").
@@ -45,6 +49,7 @@ func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, done <-ch
 func main() {
 	log.SetFlags(0) // systemd already prefixes logs with the timestamp
 
+	kingpin.CommandLine.Help = help
 	kingpin.Version(stamp.Summary())
 	kingpin.Parse()
 
