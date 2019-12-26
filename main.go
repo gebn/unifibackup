@@ -48,6 +48,11 @@ var (
 		Name:      "build_time",
 		Help:      "When the software was built, as seconds since the Unix Epoch.",
 	})
+	lastSuccessTime = promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "last_success_time",
+		Help:      "When the last successful backup completed, as seconds since the Unix Epoch.",
+	})
 )
 
 func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, done <-chan struct{}) error {
@@ -57,6 +62,7 @@ func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, done <-ch
 			if _, err := uploader.Upload(path); err != nil {
 				return fmt.Errorf("upload error: %v", err)
 			}
+			lastSuccessTime.SetToCurrentTime()
 		case err := <-monitor.Errors:
 			return fmt.Errorf("monitor error: %v", err)
 		case <-done:
