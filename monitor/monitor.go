@@ -35,7 +35,13 @@ var (
 		Help: "The number of events received from the underlying fsnotify " +
 			"library.",
 	}, []string{"op"})
-
+	errorsCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "filesystem_errors_total",
+		Help: "The number of errors received from the underlying fsnotify " +
+			"library.",
+	})
 	stateGauge = promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: namespace,
 		Subsystem: subsystem,
@@ -88,7 +94,7 @@ func New(dir string) (*Monitor, error) {
 	return &Monitor{
 		watcher: watcher,
 		Backups: filter(watcher.Events),
-		Errors:  watcher.Errors,
+		Errors:  errors(watcher.Errors),
 	}, nil
 }
 
@@ -137,4 +143,17 @@ func filter(events <-chan fsnotify.Event) <-chan string {
 		}
 	}()
 	return complete
+}
+
+// errors implements a no-op passthrough for the fsnotify errors channel. Its
+// only purpose is to increment our errors counter.
+func errors(errors <-chan error) <-chan error {
+	passthrough := make(chan error)
+	go func() {
+		for err := range errors {
+			errorsCounter.Inc()
+			passthrough <- err
+		}
+	}()
+	return passthrough
 }
