@@ -43,7 +43,7 @@ go_repository(
 go_repository(
     name = "com_github_aws_aws_sdk_go",
     importpath = "github.com/aws/aws-sdk-go",
-    tag = "v1.26.2",
+    tag = "v1.26.8",
 )
 
 go_repository(
@@ -67,7 +67,7 @@ go_repository(
 go_repository(
     name = "com_github_prometheus_client_golang",
     importpath = "github.com/prometheus/client_golang",
-    tag = "v1.1.0",
+    tag = "v1.3.0",
 )
 
 go_repository(
@@ -85,13 +85,20 @@ go_repository(
 go_repository(
     name = "com_github_prometheus_client_model",
     importpath = "github.com/prometheus/client_model",
-    commit = "14fe0d1b01d4d5fc031dd4bec1823bd3ebbe8016",
+    commit = "v0.1.0",
 )
 
 go_repository(
     name = "com_github_prometheus_procfs",
     importpath = "github.com/prometheus/procfs",
-    tag = "v0.0.5",
+    tag = "v0.0.8",
+)
+
+go_repository(
+    name = "com_github_cespare_xxhash",
+    importpath = "github.com/cespare/xxhash/v2",
+    version = "v2.1.1",
+    sum = "h1:6MnRN8NT7+YBpUIWxHtefFZOKTAPgGjpQSxqLNn0+qY=",
 )
 
 go_repository(
