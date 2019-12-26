@@ -63,3 +63,39 @@ go_repository(
     commit = "fb15b899a75114aa79cc930e33c46b577cc664b1",
     importpath = "github.com/alecthomas/template",
 )
+
+go_repository(
+    name = "com_github_prometheus_client_golang",
+    importpath = "github.com/prometheus/client_golang",
+    tag = "v1.1.0",
+)
+
+go_repository(
+    name = "com_github_prometheus_common",
+    importpath = "github.com/prometheus/common",
+    tag = "v0.7.0",
+)
+
+go_repository(
+    name = "com_github_beorn7_perks",
+    importpath = "github.com/beorn7/perks",
+    tag = "v1.0.1",
+)
+
+go_repository(
+    name = "com_github_prometheus_client_model",
+    importpath = "github.com/prometheus/client_model",
+    commit = "14fe0d1b01d4d5fc031dd4bec1823bd3ebbe8016",
+)
+
+go_repository(
+    name = "com_github_prometheus_procfs",
+    importpath = "github.com/prometheus/procfs",
+    tag = "v0.0.5",
+)
+
+go_repository(
+    name = "com_github_matttproud_golang_protobuf_extensions",
+    importpath = "github.com/matttproud/golang_protobuf_extensions",
+    commit = "c182affec369e30f25d3eb8cd8a478dee585ae7d",
+)

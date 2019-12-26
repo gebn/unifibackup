@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/gebn/unifibackup/monitor"
 	"github.com/gebn/unifibackup/uploader"
@@ -12,11 +13,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gebn/go-stamp"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 const (
-	help = "Watches for new UniFi Controller backups and uploads them to S3."
+	help      = "Watches for new UniFi Controller backups and uploads them to S3."
+	namespace = "unifibackup"
 )
 
 var (
@@ -29,6 +33,21 @@ var (
 	prefix = kingpin.Flag("prefix", "Prepended to the file name to form the object key of backups.").
 		Default("unifi/").
 		String()
+
+	buildInfo = promauto.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: namespace,
+			Name:      "build_info",
+			Help:      "The version and commit of the software. Constant 1.",
+		},
+		// the runtime version is already exposed by the default Go collector
+		[]string{"version", "commit"},
+	)
+	buildTime = promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "build_time",
+		Help:      "When the software was built, as seconds since the Unix Epoch.",
+	})
 )
 
 func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, done <-chan struct{}) error {
@@ -44,6 +63,11 @@ func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, done <-ch
 			return nil
 		}
 	}
+}
+
+func init() {
+	buildInfo.WithLabelValues(stamp.Version, stamp.Commit).Set(1)
+	buildTime.Set(float64(stamp.Time().UnixNano()) / float64(time.Second))
 }
 
 func main() {
