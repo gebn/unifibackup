@@ -5,5 +5,9 @@ go_library(
     srcs = ["monitor.go"],
     importpath = "github.com/gebn/unifibackup/monitor",
     visibility = ["//visibility:public"],
-    deps = ["@com_github_fsnotify_fsnotify//:go_default_library"],
+    deps = [
+        "@com_github_fsnotify_fsnotify//:go_default_library",
+        "@com_github_prometheus_client_golang//prometheus:go_default_library",
+        "@com_github_prometheus_client_golang//prometheus/promauto:go_default_library",
+    ],
 )

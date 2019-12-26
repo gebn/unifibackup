@@ -8,7 +8,48 @@ import (
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
+
+const (
+	namespace = "unifibackup"
+	subsystem = "monitor"
+)
+
+var (
+	// ops constains all possible event types we can receive from fsnotify, so
+	// we can initialise all time series for the filesystem events counter.
+	ops = []fsnotify.Op{
+		fsnotify.Create,
+		fsnotify.Write,
+		fsnotify.Remove,
+		fsnotify.Rename,
+		fsnotify.Chmod,
+	}
+
+	eventsCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "filesystem_events_total",
+		Help: "The number of events received from the underlying fsnotify " +
+			"library.",
+	}, []string{"op"})
+
+	stateGauge = promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Subsystem: subsystem,
+		Name:      "state",
+		Help: "The current state of the monitor state machine. 0: waiting for " +
+			"create file, 1: waiting for write to the meta file.",
+	})
+)
+
+func init() {
+	for _, op := range ops {
+		eventsCounter.WithLabelValues(op.String())
+	}
+}
 
 // Monitor encapsulates the output of watching for UniFi backups.
 type Monitor struct {
@@ -61,6 +102,7 @@ func filter(events <-chan fsnotify.Event) <-chan string {
 		state := 0
 		var lastCreated string
 		for event := range events {
+			eventsCounter.WithLabelValues(event.Op.String()).Inc()
 			switch state {
 			// looking for a create file event
 			case 0:
@@ -69,11 +111,13 @@ func filter(events <-chan fsnotify.Event) <-chan string {
 				}
 				lastCreated = event.Name
 				state = 1
+				stateGauge.Set(1)
 			// observing writes; waiting for one to the meta file
 			case 1:
 				if event.Op != fsnotify.Write {
 					// reset
 					state = 0
+					stateGauge.Set(0)
 					continue
 				}
 				if strings.HasSuffix(event.Name, ".unf") {
@@ -87,6 +131,7 @@ func filter(events <-chan fsnotify.Event) <-chan string {
 					// reset
 					complete <- lastCreated
 					state = 0
+					stateGauge.Set(0)
 				}
 			}
 		}
