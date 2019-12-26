@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"time"
 
 	"github.com/gebn/unifibackup/monitor"
@@ -15,6 +18,7 @@ import (
 	"github.com/gebn/go-stamp"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -32,6 +36,8 @@ var (
 		String()
 	prefix = kingpin.Flag("prefix", "Prepended to the file name to form the object key of backups.").
 		Default("unifi/").
+		String()
+	metrics = kingpin.Flag("metrics", "A listen spec on which to expose Prometheus metrics.").
 		String()
 
 	buildInfo = promauto.NewGaugeVec(
@@ -53,6 +59,15 @@ var (
 		Name:      "last_success_time",
 		Help:      "When the last successful backup completed, as seconds since the Unix Epoch.",
 	})
+	requestDuration = promauto.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: namespace,
+			Name:      "request_duration_seconds",
+			Help: "The time taken to execute the handlers of web server " +
+				"endpoints.",
+		},
+		[]string{"path"},
+	)
 )
 
 func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, done <-chan struct{}) error {
@@ -76,6 +91,26 @@ func init() {
 	buildTime.Set(float64(stamp.Time().UnixNano()) / float64(time.Second))
 }
 
+func buildServer(listen string) *http.Server {
+	registerHandler("/metrics", promhttp.Handler())
+	return &http.Server{
+		Addr:              listen,
+		ReadHeaderTimeout: time.Second * 5,
+		IdleTimeout:       time.Minute * 3,
+	}
+}
+
+// registerHandler adds an instrumented version of the provided handler to the
+// default mux at the indicated path.
+func registerHandler(path string, handler http.Handler) {
+	http.Handle(path, promhttp.InstrumentHandlerDuration(
+		requestDuration.MustCurryWith(prometheus.Labels{
+			"path": path,
+		}),
+		handler,
+	))
+}
+
 func main() {
 	log.SetFlags(0) // systemd already prefixes logs with the timestamp
 
@@ -90,6 +125,24 @@ func main() {
 		<-sigs
 		close(done)
 	}()
+
+	if *metrics != "" {
+		srv := buildServer(*metrics)
+		wg := sync.WaitGroup{}
+		defer wg.Wait()
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+				log.Printf("server did not close cleanly: %v", err)
+			}
+		}()
+		defer func() {
+			if err := srv.Shutdown(context.Background()); err != nil {
+				log.Printf("failed to close listener: %v", err)
+			}
+		}()
+	}
 
 	monitor, err := monitor.New(*backupDir)
 	if err != nil {
