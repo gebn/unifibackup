@@ -67,7 +67,7 @@ go_repository(
 
 go_repository(
     name = "com_github_alecthomas_kingpin",
-    importpath = "gopkg.in/alecthomas/kingpin.v2",
+    importpath = "github.com/alecthomas/kingpin",
     tag = "v2.2.6",
 )
 
