@@ -39,6 +39,9 @@ var (
 		String()
 	metrics = kingpin.Flag("metrics", "A listen spec on which to expose Prometheus metrics.").
 		String()
+	timeout = kingpin.Flag("timeout", "The amount of time to allow put and delete requests to S3 to complete.").
+		Default("5m").
+		Duration()
 
 	buildInfo = promauto.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -70,13 +73,16 @@ var (
 	)
 )
 
-func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, done <-chan struct{}) error {
+func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, timeout time.Duration, done <-chan struct{}) error {
 	for {
 		select {
 		case path := <-monitor.Backups:
-			if _, err := uploader.Upload(path); err != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+			if _, err := uploader.Upload(ctx, path); err != nil {
+				cancel()
 				return fmt.Errorf("upload error: %v", err)
 			}
+			cancel()
 			lastSuccessTime.SetToCurrentTime()
 		case err := <-monitor.Errors:
 			return fmt.Errorf("monitor error: %v", err)
@@ -152,7 +158,7 @@ func main() {
 	sess := session.Must(session.NewSession())
 	svc := s3.New(sess)
 	uploader := uploader.New(svc, *bucket, *prefix)
-	if err = backupLoop(uploader, monitor, done); err != nil {
+	if err = backupLoop(uploader, monitor, *timeout, done); err != nil {
 		log.Println(err)
 	}
 

@@ -1,6 +1,7 @@
 package uploader
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -81,7 +82,7 @@ func New(svc s3iface.S3API, bucket, prefix string) *Uploader {
 	}
 }
 
-func (u *Uploader) Upload(path string) (*s3manager.UploadOutput, error) {
+func (u *Uploader) Upload(ctx context.Context, path string) (*s3manager.UploadOutput, error) {
 	uploadAttempts.Inc()
 	f, err := os.Open(path)
 	if err != nil {
@@ -94,7 +95,7 @@ func (u *Uploader) Upload(path string) (*s3manager.UploadOutput, error) {
 	base := filepath.Base(path)
 	key := u.Prefix + base
 	start := time.Now()
-	uploaded, err := u.Manager.Upload(&s3manager.UploadInput{
+	uploaded, err := u.Manager.UploadWithContext(ctx, &s3manager.UploadInput{
 		Bucket: &u.Bucket,
 		Key:    &key,
 		Body:   reader,
@@ -111,7 +112,7 @@ func (u *Uploader) Upload(path string) (*s3manager.UploadOutput, error) {
 
 	if u.previousKey != "" { // delete old backup *after* uploading new one
 		deleteAttempts.Inc()
-		_, err := u.Manager.S3.DeleteObject(&s3.DeleteObjectInput{
+		_, err := u.Manager.S3.DeleteObjectWithContext(ctx, &s3.DeleteObjectInput{
 			Bucket: &u.Bucket,
 			Key:    &u.previousKey,
 		})
