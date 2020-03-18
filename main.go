@@ -51,12 +51,12 @@ var (
 	)
 	buildTime = promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: namespace,
-		Name:      "build_time",
+		Name:      "build_time_seconds",
 		Help:      "When the software was built, as seconds since the Unix Epoch.",
 	})
 	lastSuccessTime = promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: namespace,
-		Name:      "last_success_time",
+		Name:      "last_success_time_seconds",
 		Help:      "When the last successful backup completed, as seconds since the Unix Epoch.",
 	})
 	requestDuration = promauto.NewHistogramVec(
