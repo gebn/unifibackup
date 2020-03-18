@@ -56,7 +56,7 @@ go_repository(
 go_repository(
     name = "com_github_aws_aws_sdk_go",
     importpath = "github.com/aws/aws-sdk-go",
-    tag = "v1.29.13",
+    tag = "v1.29.27",
 )
 
 go_repository(
@@ -86,7 +86,7 @@ go_repository(
 go_repository(
     name = "com_github_prometheus_client_golang",
     importpath = "github.com/prometheus/client_golang",
-    tag = "v1.4.1",
+    tag = "v1.5.1",
 )
 
 go_repository(
