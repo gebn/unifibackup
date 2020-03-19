@@ -129,3 +129,9 @@ go_repository(
     commit = "c182affec369e30f25d3eb8cd8a478dee585ae7d",
     importpath = "github.com/matttproud/golang_protobuf_extensions",
 )
+
+go_repository(
+    name = "org_golang_x_sys",
+    commit = "5766fd39f98ddd8d769ad4aedcee557dd28de90f",
+    importpath = "golang.org/x/sys",
+)
