@@ -6,7 +6,9 @@ After=network.target
 [Service]
 User=unifi
 
-# specify --prefix to override the bucket prefix from "unifi/"
+# --prefix to override the bucket prefix from "unifi/"
+# --metrics :<port> to expose metrics in Prometheus format
+# --timeout <duration, e.g. 10s> to set max duration per S3 operation
 ExecStart=/opt/unifibackup/unifibackup --bucket <changeme>
 
 # region of the S3 bucket passed in above, e.g. eu-west-2
