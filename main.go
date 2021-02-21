@@ -46,6 +46,11 @@ var (
 		Name:      "last_success_time_seconds",
 		Help:      "When the last successful backup completed, as seconds since the Unix Epoch.",
 	})
+	failures = promauto.NewCounter(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "failures_total",
+		Help:      "The number of end-to-end upload operations that have not completed successfully.",
+	})
 	requestDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Namespace: namespace,
@@ -62,11 +67,12 @@ func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, timeout t
 		case path := <-monitor.Backups:
 			ctx, cancel := context.WithTimeout(context.Background(), timeout)
 			if _, err := uploader.Upload(ctx, path); err != nil {
-				cancel()
-				return fmt.Errorf("upload error: %v", err)
+				log.Printf("upload error: %v", err)
+				failures.Inc()
+			} else {
+				lastSuccessTime.SetToCurrentTime()
 			}
 			cancel()
-			lastSuccessTime.SetToCurrentTime()
 		case err := <-monitor.Errors:
 			return fmt.Errorf("monitor error: %v", err)
 		case <-done:
