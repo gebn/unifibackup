@@ -3,6 +3,6 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["countingreader.go"],
-    importpath = "github.com/gebn/unifibackup/internal/pkg/countingreader",
+    importpath = "github.com/gebn/unifibackup/v2/internal/pkg/countingreader",
     visibility = ["//:__subpackages__"],
 )

@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/gebn/unifibackup/internal/pkg/countingreader"
+	"github.com/gebn/unifibackup/v2/internal/pkg/countingreader"
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"

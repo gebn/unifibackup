@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["uploader.go"],
-    importpath = "github.com/gebn/unifibackup/uploader",
+    importpath = "github.com/gebn/unifibackup/v2/uploader",
     visibility = ["//visibility:public"],
     deps = [
         "//internal/pkg/countingreader:go_default_library",
