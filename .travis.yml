@@ -1,34 +1,29 @@
 os: linux
-language: shell  # N.B. Bazel downloads its own Go SDK
+dist: focal
+language: go
+go:
+- 1.16  # Bazel still uses its own version
 env:
   global:
-    - BAZEL_VERSION=4.0.0
-    - BAZEL_SHA256=bd7a3a583a18640f58308c26e654239d412adaa833b6b6a7b57a216ab62fabc2
+  - BAZEL_VERSION=4.0.0
+  - BAZEL_SHA256=bd7a3a583a18640f58308c26e654239d412adaa833b6b6a7b57a216ab62fabc2
 before_install:
-  - |
-    wget -O install.sh "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
-    echo "${BAZEL_SHA256}  install.sh" | sha256sum -c
-    chmod +x install.sh
+- |
+  wget -O install.sh "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
+  echo "${BAZEL_SHA256}  install.sh" | sha256sum -c
+  chmod +x install.sh
 install:
-  - |
-    ./install.sh --user
-    bazel shutdown  # prevents "WARNING: Running Bazel server needs to be killed, because the startup options are different."
-    rm -f install.sh
+- |
+  ./install.sh --user
+  rm -f install.sh
 script:
-  - |
-    bazel \
-      --host_jvm_args=-Xmx7000m \
-      --host_jvm_args=-Xms7000m \
-      build \
-      --config=ci \
-      --noshow_progress \
-      --noshow_loading_progress \
-      --local_resources=7500,2,1.0 \
-      //...
-  - bazel-bin/linux_amd64_static_pure_stripped/unifibackup --version
+- |
+  travis_wait bazel build --config=ci //...
+  bazel run //:unifibackup -- --version
 before_deploy:
-  - mkdir out
-  - bin/release out
+- |
+  mkdir out
+  bin/release out
 deploy:
   provider: releases
   edge: true
