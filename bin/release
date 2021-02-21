@@ -4,14 +4,11 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-readonly NAME=unifibackup
-readonly TARGET="//:$NAME"
-
 readonly PLATFORMS=(
-    # <Bazel toolchain name>,<output binary name>,<suffix for binary>
-	linux_amd64,$NAME,linux-x86_64
-	windows_amd64,$NAME.exe,windows-x86_64.exe
-	darwin_amd64,$NAME,darwin-x86_64
+    # <Bazel toolchain name>,<suffix for archive name>
+	linux_amd64,linux-x86_64
+	windows_amd64,windows-x86_64
+	darwin_amd64,darwin-x86_64
 )
 
 readonly VERSION=$(git describe --always --tags --dirty)
@@ -21,18 +18,12 @@ main() {
     local output_dir="$1"
     echo "Creating $VERSION binaries for ${#PLATFORMS[@]} platforms in $output_dir..."
     for platform in "${PLATFORMS[@]}"; do
-        IFS=',' read toolchain binary suffix <<< "$platform"
-        bazel \
-          --host_jvm_args=-Xmx7000m \
-          --host_jvm_args=-Xms7000m \
-          build \
+        IFS=',' read toolchain suffix <<< "$platform"
+        bazel build \
           --config=ci \
-          --noshow_progress \
-          --noshow_loading_progress \
-          --local_resources=7500,2,1.0 \
-          "$TARGET" \
-          --platforms "${TOOLCHAIN_PREFIX}$toolchain"
-        mv "bazel-bin/${toolchain}_static_pure_stripped/${binary}" "$output_dir/$NAME-$VERSION-$suffix"
+          --platforms "${TOOLCHAIN_PREFIX}$toolchain" \
+          :archive
+        mv bazel-bin/archive.tar.gz "$output_dir/unifibackup-$VERSION-$suffix.tar.gz"
     done
 }
 

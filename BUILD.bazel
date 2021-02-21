@@ -1,5 +1,6 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 # gazelle:prefix github.com/gebn/unifibackup/v2
 gazelle(name = "gazelle")
@@ -27,4 +28,10 @@ go_binary(
     pure = "on",
     static = "on",
     visibility = ["//visibility:public"],
+)
+
+pkg_tar(
+    name = "archive",
+    srcs = [":unifibackup"],
+    extension = "tar.gz",
 )
