@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,36 +14,19 @@ import (
 	"github.com/gebn/unifibackup/monitor"
 	"github.com/gebn/unifibackup/uploader"
 
-	"github.com/alecthomas/kingpin"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/gebn/go-stamp"
+	"github.com/gebn/go-stamp/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const (
-	help      = "Watches for new UniFi Controller backups and uploads them to S3."
 	namespace = "unifibackup"
 )
 
 var (
-	backupDir = kingpin.Flag("dir", "Path of the autobackup directory.").
-			Default("/var/lib/unifi/backup/autobackup").
-			String() // we don't use ExistingDir() as that requires a valid dir to use `--version`
-	bucket = kingpin.Flag("bucket", "Name of the S3 bucket to upload to.").
-		Required().
-		String()
-	prefix = kingpin.Flag("prefix", "Prepended to the file name to form the object key of backups.").
-		Default("unifi/").
-		String()
-	metrics = kingpin.Flag("metrics", "A listen spec on which to expose Prometheus metrics.").
-		String()
-	timeout = kingpin.Flag("timeout", "The amount of time to allow put and delete requests to S3 to complete.").
-		Default("5m").
-		Duration()
-
 	buildInfo = promauto.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: namespace,
@@ -66,8 +50,7 @@ var (
 		prometheus.HistogramOpts{
 			Namespace: namespace,
 			Name:      "request_duration_seconds",
-			Help: "The time taken to execute the handlers of web server " +
-				"endpoints.",
+			Help:      "The time taken to execute the handlers of web server endpoints.",
 		},
 		[]string{"path"},
 	)
@@ -118,11 +101,20 @@ func registerHandler(path string, handler http.Handler) {
 }
 
 func main() {
-	log.SetFlags(0) // systemd already prefixes logs with the timestamp
+	flgBackupDir := flag.String("dir", "/var/lib/unifi/backup/autobackup", "Path of the autobackup directory.")
+	flgBucket := flag.String("bucket", "", "Name of the S3 bucket to upload to.")
+	flgPrefix := flag.String("prefix", "unifi/", "Prepended to the backup file name to form the object key.")
+	flgMetrics := flag.String("metrics", "", "A listen spec on which to expose Prometheus metrics. If empty, no metrics are exposed.")
+	flgTimeout := flag.Duration("timeout", 5*time.Minute, "The amount of time to allow for put and delete S3 requests.")
+	flgVersion := flag.Bool("version", false, "Print program version and exit.")
+	flag.Parse()
 
-	kingpin.CommandLine.Help = help
-	kingpin.Version(stamp.Summary())
-	kingpin.Parse()
+	if *flgVersion {
+		fmt.Println(stamp.Summary())
+		return
+	}
+
+	log.SetFlags(0) // systemd already prefixes logs with the timestamp
 
 	sigs := make(chan os.Signal)
 	signal.Notify(sigs, os.Interrupt)
@@ -132,8 +124,8 @@ func main() {
 		close(done)
 	}()
 
-	if *metrics != "" {
-		srv := buildServer(*metrics)
+	if *flgMetrics != "" {
+		srv := buildServer(*flgMetrics)
 		wg := sync.WaitGroup{}
 		defer wg.Wait()
 		wg.Add(1)
@@ -150,15 +142,15 @@ func main() {
 		}()
 	}
 
-	monitor, err := monitor.New(*backupDir)
+	monitor, err := monitor.New(*flgBackupDir)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	sess := session.Must(session.NewSession())
 	svc := s3.New(sess)
-	uploader := uploader.New(svc, *bucket, *prefix)
-	if err = backupLoop(uploader, monitor, *timeout, done); err != nil {
+	uploader := uploader.New(svc, *flgBucket, *flgPrefix)
+	if err = backupLoop(uploader, monitor, *flgTimeout, done); err != nil {
 		log.Println(err)
 	}
 
