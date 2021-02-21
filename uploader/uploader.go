@@ -10,9 +10,8 @@ import (
 
 	"github.com/gebn/unifibackup/v2/internal/pkg/countingreader"
 
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3iface"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	s3manager "github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -68,17 +67,19 @@ var (
 )
 
 type Uploader struct {
-	Manager     *s3manager.Uploader
+	Client      *s3.Client
+	Uploader    *s3manager.Uploader
 	Bucket      string
 	Prefix      string
 	previousKey string
 }
 
-func New(svc s3iface.S3API, bucket, prefix string) *Uploader {
+func New(client *s3.Client, bucket, prefix string) *Uploader {
 	return &Uploader{
-		Manager: s3manager.NewUploaderWithClient(svc),
-		Bucket:  bucket,
-		Prefix:  prefix,
+		Client:   client,
+		Uploader: s3manager.NewUploader(client),
+		Bucket:   bucket,
+		Prefix:   prefix,
 	}
 }
 
@@ -95,7 +96,7 @@ func (u *Uploader) Upload(ctx context.Context, path string) (*s3manager.UploadOu
 	base := filepath.Base(path)
 	key := u.Prefix + base
 	start := time.Now()
-	uploaded, err := u.Manager.UploadWithContext(ctx, &s3manager.UploadInput{
+	uploaded, err := u.Uploader.Upload(ctx, &s3.PutObjectInput{
 		Bucket: &u.Bucket,
 		Key:    &key,
 		Body:   reader,
@@ -112,7 +113,7 @@ func (u *Uploader) Upload(ctx context.Context, path string) (*s3manager.UploadOu
 
 	if u.previousKey != "" { // delete old backup *after* uploading new one
 		deleteAttempts.Inc()
-		_, err := u.Manager.S3.DeleteObjectWithContext(ctx, &s3.DeleteObjectInput{
+		_, err := u.Client.DeleteObject(ctx, &s3.DeleteObjectInput{
 			Bucket: &u.Bucket,
 			Key:    &u.previousKey,
 		})

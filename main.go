@@ -14,8 +14,8 @@ import (
 	"github.com/gebn/unifibackup/v2/monitor"
 	"github.com/gebn/unifibackup/v2/uploader"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gebn/go-stamp/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -147,9 +147,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	sess := session.Must(session.NewSession())
-	svc := s3.New(sess)
-	uploader := uploader.New(svc, *flgBucket, *flgPrefix)
+	cfg, err := config.LoadDefaultConfig(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := s3.NewFromConfig(cfg)
+	uploader := uploader.New(client, *flgBucket, *flgPrefix)
 	if err = backupLoop(uploader, monitor, *flgTimeout, done); err != nil {
 		log.Println(err)
 	}
