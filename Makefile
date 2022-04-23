@@ -43,5 +43,9 @@ endif
 distpath:
 	@echo $(ARCHIVE)
 
+# used by CI to get the tag to push to Docker Hub
+tag:
+	@echo $(VERSION)
+
 clean:
 	rm -f $(OUT) $(ARCHIVE)
