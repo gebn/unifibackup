@@ -1,9 +1,0 @@
-build --workspace_status_command=bin/workspace_status
-build --stamp
-
-build:ci --verbose_failures
-build:ci --sandbox_debug
-build:ci --spawn_strategy=standalone
-build:ci --genrule_strategy=standalone
-test:ci --test_strategy=standalone
-test:ci --test_output=errors
