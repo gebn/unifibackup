@@ -8,7 +8,7 @@ User=unifi
 Restart=on-failure
 
 # --prefix to override the bucket prefix from "unifi/"
-# --metrics :<port> to expose metrics in Prometheus format
+# --metrics :<port> to override Prometheus metrics port
 # --timeout <duration, e.g. 10s> to set max duration per S3 operation
 ExecStart=/opt/unifibackup/unifibackup --bucket <changeme>
 

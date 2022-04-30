@@ -117,7 +117,7 @@ func app(ctx context.Context) error {
 	flgBackupDir := flag.String("dir", "/var/lib/unifi/backup/autobackup", "Path of the autobackup directory.")
 	flgBucket := flag.String("bucket", "", "Name of the S3 bucket to upload to.")
 	flgPrefix := flag.String("prefix", "unifi/", "Prepended to the backup file name to form the object key.")
-	flgMetrics := flag.String("metrics", "", "A listen spec on which to expose Prometheus metrics. If empty, no metrics are exposed.")
+	flgMetrics := flag.String("metrics", ":9184", "A listen spec on which to expose Prometheus metrics.")
 	flgTimeout := flag.Duration("timeout", 5*time.Minute, "The amount of time to allow for put and delete S3 requests.")
 	flgVersion := flag.Bool("version", false, "Print program version and exit.")
 	flag.Parse()
@@ -137,23 +137,21 @@ func app(ctx context.Context) error {
 		close(done)
 	}()
 
-	if *flgMetrics != "" {
-		srv := buildServer(*flgMetrics)
-		wg := sync.WaitGroup{}
-		defer wg.Wait()
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-				log.Printf("server did not close cleanly: %v", err)
-			}
-		}()
-		defer func() {
-			if err := srv.Shutdown(context.Background()); err != nil {
-				log.Printf("failed to close listener: %v", err)
-			}
-		}()
-	}
+	srv := buildServer(*flgMetrics)
+	wg := sync.WaitGroup{}
+	defer wg.Wait()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			log.Printf("server did not close cleanly: %v", err)
+		}
+	}()
+	defer func() {
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Printf("failed to close listener: %v", err)
+		}
+	}()
 
 	monitor, err := monitor.New(*flgBackupDir)
 	if err != nil {
