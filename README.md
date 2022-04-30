@@ -1,6 +1,7 @@
 # UniFi Backup
 
 [![CI](https://github.com/gebn/unifibackup/actions/workflows/ci.yaml/badge.svg)](https://github.com/gebn/unifibackup/actions/workflows/ci.yaml)
+[![Docker Hub](https://img.shields.io/docker/pulls/gebn/unifibackup.svg)](https://hub.docker.com/r/gebn/unifibackup)
 [![Go Reference](https://pkg.go.dev/badge/github.com/gebn/unifibackup/v2.svg)](https://pkg.go.dev/github.com/gebn/unifibackup/v2)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gebn/unifibackup)](https://goreportcard.com/report/github.com/gebn/unifibackup)
 
