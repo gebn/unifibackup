@@ -85,11 +85,11 @@ func (m *Monitor) Close() error {
 func New(dir string) (*Monitor, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create watcher: %v", err)
+		return nil, fmt.Errorf("failed to create watcher: %w", err)
 	}
 	if err = watcher.Add(dir); err != nil {
 		watcher.Close()
-		return nil, fmt.Errorf("failed to watch %v: %v", dir, err)
+		return nil, fmt.Errorf("failed to watch %v: %w", dir, err)
 	}
 	return &Monitor{
 		watcher: watcher,

@@ -88,7 +88,7 @@ func (u *Uploader) Upload(ctx context.Context, path string) (*s3manager.UploadOu
 	f, err := os.Open(path)
 	if err != nil {
 		uploadFailures.Inc()
-		return nil, fmt.Errorf("failed to open %v for uploading: %v", path, err)
+		return nil, fmt.Errorf("failed to open %v for uploading: %w", path, err)
 	}
 	defer f.Close()
 
@@ -103,7 +103,7 @@ func (u *Uploader) Upload(ctx context.Context, path string) (*s3manager.UploadOu
 	})
 	if err != nil {
 		uploadFailures.Inc()
-		return nil, fmt.Errorf("failed to upload %v: %v", base, err)
+		return nil, fmt.Errorf("failed to upload %v: %w", base, err)
 	}
 	elapsed := time.Since(start)
 	uploadDuration.Set(elapsed.Seconds())

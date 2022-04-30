@@ -74,7 +74,7 @@ func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, timeout t
 			}
 			cancel()
 		case err := <-monitor.Errors:
-			return fmt.Errorf("monitor error: %v", err)
+			return fmt.Errorf("monitor error: %w", err)
 		case <-done:
 			return nil
 		}
