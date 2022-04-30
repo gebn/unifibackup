@@ -1,6 +1,6 @@
 # UniFi Backup
 
-[![Build Status](https://travis-ci.org/gebn/unifibackup.svg?branch=master)](https://travis-ci.org/gebn/unifibackup)
+[![CI](https://github.com/gebn/unifibackup/actions/workflows/ci.yaml/badge.svg)](https://github.com/gebn/unifibackup/actions/workflows/ci.yaml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/gebn/unifibackup/v2.svg)](https://pkg.go.dev/github.com/gebn/unifibackup/v2)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gebn/unifibackup)](https://goreportcard.com/report/github.com/gebn/unifibackup)
 
