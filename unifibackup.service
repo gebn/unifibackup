@@ -12,8 +12,8 @@ Restart=on-failure
 # --timeout <duration, e.g. 10s> to set max duration per S3 operation
 ExecStart=/opt/unifibackup/unifibackup --bucket <changeme>
 
-# region of the S3 bucket passed in above, e.g. eu-west-2
-Environment=AWS_REGION=<changeme>
+# region of the S3 bucket passed in above, if different from current region, or running outside AWS
+#Environment=AWS_REGION=
 
 # ideally, these should not have to be provided, as the AWS SDK will retrieve
 # credentials from elsewhere (e.g. via the instance profile if running in EC2)
