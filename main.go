@@ -14,8 +14,8 @@ import (
 	"github.com/gebn/unifibackup/v2/monitor"
 	"github.com/gebn/unifibackup/v2/uploader"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gebn/go-stamp/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -107,6 +107,13 @@ func registerHandler(path string, handler http.Handler) {
 }
 
 func main() {
+	if err := app(context.Background()); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func app(ctx context.Context) error {
 	flgBackupDir := flag.String("dir", "/var/lib/unifi/backup/autobackup", "Path of the autobackup directory.")
 	flgBucket := flag.String("bucket", "", "Name of the S3 bucket to upload to.")
 	flgPrefix := flag.String("prefix", "unifi/", "Prepended to the backup file name to form the object key.")
@@ -117,7 +124,7 @@ func main() {
 
 	if *flgVersion {
 		fmt.Println(stamp.Summary())
-		return
+		return nil
 	}
 
 	log.SetFlags(0) // systemd already prefixes logs with the timestamp
@@ -150,17 +157,19 @@ func main() {
 
 	monitor, err := monitor.New(*flgBackupDir)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	defer func() {
+		if err := monitor.Close(); err != nil {
+			log.Printf("failed to close monitor: %v", err)
+		}
+	}()
 
-	sess := session.Must(session.NewSession())
-	svc := s3.New(sess)
-	uploader := uploader.New(svc, *flgBucket, *flgPrefix)
-	if err = backupLoop(uploader, monitor, *flgTimeout, done); err != nil {
-		log.Println(err)
+	cfg, err := config.LoadDefaultConfig(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to initialise AWS SDK: %w", err)
 	}
-
-	if err = monitor.Close(); err != nil {
-		log.Printf("failed to close monitor: %v", err)
-	}
+	s3client := s3.NewFromConfig(cfg)
+	uploader := uploader.New(s3client, *flgBucket, *flgPrefix)
+	return backupLoop(uploader, monitor, *flgTimeout, done)
 }
