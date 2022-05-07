@@ -19,7 +19,7 @@ The executable is intended to run under systemd. The following instructions deta
 
 2. Copy `unifibackup.service` to `/etc/systemd/system`, and open the file in your favourite editor.
    1. Change the bucket to the one you want to upload to (see *IAM Policy* below for required permissions), and optionally override the destination prefix.
-   2. Set `AWS_REGION` to the region of the bucket above if necessary.
+   2. Set `AWS_REGION` to the region of the bucket above.
    3. If not using an instance profile, and credentials are not configured elsewhere, set the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
 
 3. Execute the following as `root`:
