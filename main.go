@@ -20,6 +20,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.uber.org/automaxprocs/maxprocs"
 )
 
 const (
@@ -82,6 +83,7 @@ func backupLoop(uploader *uploader.Uploader, monitor *monitor.Monitor, timeout t
 }
 
 func init() {
+	maxprocs.Set() // use the library this way to avoid logging when CPU quota is undefined
 	buildInfo.WithLabelValues(stamp.Version, stamp.Commit).Set(1)
 	buildTime.Set(float64(stamp.Time().UnixNano()) / float64(time.Second))
 }
