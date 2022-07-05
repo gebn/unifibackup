@@ -41,5 +41,6 @@ func genmeta(backupDir string) error {
 		return err
 	}
 	defer f.Close()
+	// unlike genuine meta files, this produces a trailing linefeed
 	return json.NewEncoder(f).Encode(meta)
 }
