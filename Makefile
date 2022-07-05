@@ -25,7 +25,7 @@ LDFLAGS := -ldflags=" \
 
 # just build a binary
 build:
-	go build $(LDFLAGS) -o $(OUT)
+	go build $(LDFLAGS) -o $(OUT) ./cmd/unifibackup
 
 # create the full-blown archive
 dist: build

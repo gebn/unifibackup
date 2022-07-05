@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gebn/unifibackup/v2/monitor"
-	"github.com/gebn/unifibackup/v2/uploader"
+	"github.com/gebn/unifibackup/v2/cmd/unifibackup/monitor"
+	"github.com/gebn/unifibackup/v2/cmd/unifibackup/uploader"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
