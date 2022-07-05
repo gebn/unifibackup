@@ -106,39 +106,36 @@ func filter(events <-chan fsnotify.Event) <-chan string {
 	// we don't bother with a WaitGroup as there is never cleanup to do
 	go func() {
 		state := 0
-		var lastCreated string
+		var lastBackupCreated string
 		for event := range events {
 			eventsCounter.WithLabelValues(event.Op.String()).Inc()
 			switch state {
-			// looking for a create file event
+			// looking for a backup creation event
 			case 0:
-				if event.Op != fsnotify.Create {
+				if event.Op != fsnotify.Create || !strings.HasSuffix(event.Name, ".unf") {
 					continue
 				}
-				lastCreated = event.Name
+				lastBackupCreated = event.Name
 				state = 1
 				stateGauge.Set(1)
-			// observing writes; waiting for one to the meta file
+				// Observing writes; waiting for one to the meta file to indicate
+				// the backup file is finished. A meta file may or may not already
+				// exist.
 			case 1:
-				if event.Op != fsnotify.Write {
-					// reset
-					state = 0
-					stateGauge.Set(0)
-					continue
-				}
 				if strings.HasSuffix(event.Name, ".unf") {
-					// new backup file is being written; we see >5000 of
+					// assume new backup file is being written; we see >5000 of
 					// these events before it finishes
 					continue
 				}
 				if strings.HasSuffix(event.Name, ".json") {
 					// meta file is being written, which means backup file
-					// is complete, so we can put it on the channel and
-					// reset
-					complete <- lastCreated
-					state = 0
-					stateGauge.Set(0)
+					// is complete, so we can put it on the channel
+					complete <- lastBackupCreated
+					// fall through
 				}
+				// something odd, or we have our backup - reset
+				state = 0
+				stateGauge.Set(0)
 			}
 		}
 	}()
