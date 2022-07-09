@@ -90,7 +90,7 @@ func main() {
 		Use:   "genmeta",
 		Short: "Generate autobackup_meta.json for the autobackup directory",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return genmeta(flgBackupDir)
 		},
 	})
