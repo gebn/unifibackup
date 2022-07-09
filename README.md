@@ -32,24 +32,26 @@ Running the final `status` command again after a few multiples of the backup fre
 
     $ sudo systemctl status unifibackup.service
     ● unifibackup.service - A utility to upload Unifi Controller backups to S3
-       Loaded: loaded (/etc/systemd/system/unifibackup.service; enabled; vendor preset: enabled)
-       Active: active (running) since Sat 2019-12-14 23:50:09 UTC; 1 day 20h ago
-         Docs: https://github.com/gebn/unifibackup/blob/master/README.md
-     Main PID: 7791 (unifibackup)
-        Tasks: 11 (limit: 4915)
-       CGroup: /system.slice/unifibackup.service
-               └─7791 /opt/unifibackup/unifibackup --bucket bucket.example.com
+         Loaded: loaded (/etc/systemd/system/unifibackup.service; enabled; vendor preset: enabled)
+         Active: active (running) since Tue 2022-07-05 22:44:45 UTC; 3 days ago
+           Docs: https://github.com/gebn/unifibackup/blob/master/README.md
+       Main PID: 54658 (unifibackup)
+          Tasks: 8 (limit: 1030)
+         Memory: 17.2M
+            CPU: 6min 49.127s
+         CGroup: /system.slice/unifibackup.service
+                 └─54658 /opt/unifibackup/unifibackup --bucket unifi-backups-euw2 --timeout 5s
 
-    Dec 16 10:25:07 hostname unifibackup[7791]: uploaded autobackup_5.12.35_20191216_1025_1576491900006.unf in 421ms
-    Dec 16 11:25:07 hostname unifibackup[7791]: uploaded autobackup_5.12.35_20191216_1125_1576495500002.unf in 435ms
-    Dec 16 12:25:07 hostname unifibackup[7791]: uploaded autobackup_5.12.35_20191216_1225_1576499100011.unf in 361ms
-    Dec 16 13:25:08 hostname unifibackup[7791]: uploaded autobackup_5.12.35_20191216_1325_1576502700003.unf in 396ms
-    Dec 16 14:25:07 hostname unifibackup[7791]: uploaded autobackup_5.12.35_20191216_1425_1576506300006.unf in 348ms
-    Dec 16 15:25:07 hostname unifibackup[7791]: uploaded autobackup_5.12.35_20191216_1525_1576509900006.unf in 397ms
-    Dec 16 16:25:07 hostname unifibackup[7791]: uploaded autobackup_5.12.35_20191216_1625_1576513500006.unf in 356ms
-    Dec 16 17:25:08 hostname unifibackup[7791]: uploaded autobackup_5.12.35_20191216_1725_1576517100003.unf in 409ms
-    Dec 16 18:25:07 hostname unifibackup[7791]: uploaded autobackup_5.12.35_20191216_1825_1576520700002.unf in 382ms
-    Dec 16 19:25:07 hostname unifibackup[7791]: uploaded autobackup_5.12.35_20191216_1925_1576524300011.unf in 368ms
+    Jul 09 12:26:10 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_1225_1657369500081.unf (18.991 MiB) in 513ms
+    Jul 09 13:26:11 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_1325_1657373100075.unf (19.063 MiB) in 522ms
+    Jul 09 14:26:13 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_1425_1657376700067.unf (19.139 MiB) in 497ms
+    Jul 09 15:26:12 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_1525_1657380300075.unf (19.232 MiB) in 469ms
+    Jul 09 16:26:25 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_1625_1657383900071.unf (19.221 MiB) in 421ms
+    Jul 09 17:26:16 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_1725_1657387500070.unf (19.221 MiB) in 566ms
+    Jul 09 18:26:09 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_1825_1657391100088.unf (19.241 MiB) in 594ms
+    Jul 09 19:26:10 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_1925_1657394700100.unf (19.220 MiB) in 540ms
+    Jul 09 20:26:26 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_2025_1657398300071.unf (19.216 MiB) in 598ms
+    Jul 09 21:26:15 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_2125_1657401900050.unf (19.194 MiB) in 510ms
 
 ## IAM Policy
 
