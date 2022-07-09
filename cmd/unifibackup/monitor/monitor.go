@@ -110,6 +110,7 @@ func filter(events <-chan fsnotify.Event) <-chan string {
 		for event := range events {
 			eventsCounter.WithLabelValues(event.Op.String()).Inc()
 			switch state {
+
 			// looking for a backup creation event
 			case 0:
 				if event.Op != fsnotify.Create || !strings.HasSuffix(event.Name, ".unf") {
@@ -118,17 +119,18 @@ func filter(events <-chan fsnotify.Event) <-chan string {
 				lastBackupCreated = event.Name
 				state = 1
 				stateGauge.Set(1)
-				// Observing writes; waiting for one to the meta file to indicate
-				// the backup file is finished. A meta file may or may not already
-				// exist.
+
+			// Observing writes; waiting for one to the meta file to indicate
+			// the backup file is finished. A meta file may or may not already
+			// exist.
 			case 1:
-				if strings.HasSuffix(event.Name, ".unf") {
-					// assume new backup file is being written; we see >5000 of
-					// these events before it finishes
+				if event.Op == fsnotify.Write && event.Name == lastBackupCreated {
+					// new backup file is being written; we may see thousands
+					// of these events before it finishes
 					continue
 				}
 				if strings.HasSuffix(event.Name, ".json") {
-					// meta file is being written, which means backup file
+					// meta file is being touched, which means backup file
 					// is complete, so we can put it on the channel
 					complete <- lastBackupCreated
 					// fall through
