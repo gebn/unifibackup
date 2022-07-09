@@ -26,7 +26,7 @@ func genmeta(backupDir string) error {
 			return err
 		}
 		if !strings.HasSuffix(info.Name(), ".unf") {
-			return fmt.Errorf("%v is not a backup", info.Name())
+			return fmt.Errorf("%v must only contain backups; %v is not a backup", backupDir, info.Name())
 		}
 		infos = append(infos, info)
 	}
