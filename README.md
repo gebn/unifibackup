@@ -72,3 +72,11 @@ Regardless of how the daemon runs, it requires put and delete permissions on the
     }
 
 *N.B. if using EC2, an [instance profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html) can make management much easier.*
+
+## Restore
+
+When listing backups available for restore, the UniFi software only consults an `autobackup_meta.json` file in the autobackup directory.
+As this meta file can be recreated using only the underlying backups themselves, for simplicity, we do not back it up.
+A `genmeta` subcommand exists to create an appropriate meta file given an autobackup directory containing _only_ backup files.
+It is envisaged that the controller provisioner will download the latest backup from S3 to the autobackup directory, and run `unifibackup genmeta` to create `autobackup_meta.json`.
+The restore can then be triggered via the UI.
