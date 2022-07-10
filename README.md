@@ -53,7 +53,7 @@ Running the final `status` command again after a few multiples of the backup fre
     Jul 09 20:26:26 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_2025_1657398300071.unf (19.216 MiB) in 598ms
     Jul 09 21:26:15 i-01371f14862e87305 unifibackup[54658]: uploaded autobackup_7.1.66_20220709_2125_1657401900050.unf (19.194 MiB) in 510ms
 
-## IAM Policy
+### IAM Policy
 
 Regardless of how the daemon runs, it requires put and delete permissions on the destination bucket. This can be achieved with the following IAM policy:
 
@@ -71,7 +71,7 @@ Regardless of how the daemon runs, it requires put and delete permissions on the
         ]
     }
 
-*N.B. if using EC2, an [instance profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html) can make management much easier.*
+If running in EC2, an [instance profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html) is the best way to permission this.
 
 ## Restore
 
