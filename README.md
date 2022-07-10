@@ -15,9 +15,9 @@ Enable auto backup under `Settings > Auto Backup` on your controller. Set the oc
 
 The executable is intended to run under systemd. The following instructions detail how to set up the service.
 
-1. Download the [latest](https://github.com/gebn/unifibackup/releases/latest) binary to `/opt/unifibackup/`, and ensure it is executable.
+1. Download the [latest](https://github.com/gebn/unifibackup/releases/latest) archive to `/opt/unifibackup`.
 
-2. Copy `unifibackup.service` to `/etc/systemd/system`, and open the file in your favourite editor.
+2. Copy `unifibackup.service` into `/etc/systemd/system`, and open the file in your favourite editor.
    1. Change the bucket to the one you want to upload to (see *IAM Policy* below for required permissions), and optionally override the destination prefix.
    2. Set `AWS_REGION` to the region of the bucket above.
    3. If not using an instance profile, and credentials are not configured elsewhere, set the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
@@ -76,7 +76,8 @@ If running in EC2, an [instance profile](https://docs.aws.amazon.com/IAM/latest/
 ## Restore
 
 When listing backups available for restore, the UniFi software only consults an `autobackup_meta.json` file in the autobackup directory.
-As this meta file can be recreated using only the underlying backups themselves, for simplicity, we do not back it up.
-A `genmeta` subcommand exists to create an appropriate meta file given an autobackup directory containing _only_ backup files.
+As this meta file can be recreated using only the underlying backups themselves, we do not back it up.
+Instead, a `genmeta` subcommand exists to create an appropriate meta file given an autobackup directory containing _only_ backup files.
 It is envisaged that the controller provisioner will download the latest backup from S3 to the autobackup directory, and run `unifibackup genmeta` to create `autobackup_meta.json`.
-The restore can then be triggered via the UI.
+The backup can then be correctly listed and restored via the UI.
+Note the meta file must be readable and writable by the `unifi` user, otherwise it will not be updated by the controller, which is relied on by the daemon for determining when new backups have finished being written.
