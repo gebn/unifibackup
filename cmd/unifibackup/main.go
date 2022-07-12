@@ -7,6 +7,7 @@ import (
 
 	"github.com/gebn/unifibackup/v2/cmd/unifibackup/uploader"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gebn/go-stamp/v2"
@@ -54,7 +55,8 @@ func main() {
 		Args:         cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			ctx := cmd.Context()
-			cfg, err := config.LoadDefaultConfig(ctx)
+			cfg, err := config.LoadDefaultConfig(ctx,
+				config.WithUseDualStackEndpoint(aws.DualStackEndpointStateEnabled))
 			if err != nil {
 				return fmt.Errorf("failed to initialise AWS SDK: %w", err)
 			}
