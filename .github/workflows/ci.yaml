@@ -19,12 +19,12 @@ jobs:
     - run: make dist
     - id: vars
       run: echo "::set-output name=distpath::$(make distpath)"
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.vars.outputs.distpath }}
         path: ${{ steps.vars.outputs.distpath }}
     - run: sha256sum ${{ steps.vars.outputs.distpath }} > ${{ steps.vars.outputs.distpath }}.sha256
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.vars.outputs.distpath }}.sha256
         path: ${{ steps.vars.outputs.distpath }}.sha256
@@ -51,7 +51,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - id: vars
       run: echo "::set-output name=tag::$(make tag)"
-    - uses: docker/build-push-action@v2
+    - uses: docker/build-push-action@v4
       with:
         context: .
         push: true
