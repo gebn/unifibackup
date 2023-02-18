@@ -18,7 +18,7 @@ jobs:
         go-version: 1.20.1
     - run: make dist
     - id: vars
-      run: echo "::set-output name=distpath::$(make distpath)"
+      run: echo "distpath=$(make distpath)" >> $GITHUB_OUTPUT
     - uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.vars.outputs.distpath }}
@@ -50,7 +50,7 @@ jobs:
         username: gebn
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - id: vars
-      run: echo "::set-output name=tag::$(make tag)"
+      run: echo "tag=$(make tag)" >> $GITHUB_OUTPUT
     - uses: docker/build-push-action@v4
       with:
         context: .
