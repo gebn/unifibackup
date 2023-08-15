@@ -73,6 +73,24 @@ Regardless of how the daemon runs, it requires put and delete permissions on the
 
 If running in EC2, an [instance profile](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html) is the best way to permission this.
 
+## Alerting
+
+The binary exposes Prometheus metrics at `:9184/metrics` by default.
+To be alerted when a backup has not succeeded in 3 hours, the following rule can be used:
+
+```yaml
+groups:
+- name: alerting:unifi
+  rules:
+  - alert: StaleUniFiBackup
+    expr: |2
+        unifibackup_last_success_time_seconds > 0
+      and
+        time() - unifibackup_last_success_time_seconds > 3 * 60 * 60
+    annotations:
+      description: 'UniFi Controller {{ $labels.instance }} not backed up successfully for {{ humanizeDuration $value }}'
+```
+
 ## Restore
 
 When listing backups available for restore, the UniFi software only consults an `autobackup_meta.json` file in the autobackup directory.
