@@ -84,9 +84,9 @@ groups:
   rules:
   - alert: StaleUniFiBackup
     expr: |2
-        unifibackup_last_success_time_seconds > 0
-      and
         time() - unifibackup_last_success_time_seconds > 3 * 60 * 60
+      and
+        unifibackup_last_success_time_seconds > 0
     annotations:
       description: 'UniFi Controller {{ $labels.instance }} not backed up successfully for {{ humanizeDuration $value }}'
 ```
