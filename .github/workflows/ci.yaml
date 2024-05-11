@@ -11,6 +11,8 @@ jobs:
       GOOS: ${{ matrix.goos }}
       GOARCH: ${{ matrix.goarch }}
       CGO_ENABLED: 0  # static binary
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-go@v4
