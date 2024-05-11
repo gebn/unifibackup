@@ -112,6 +112,9 @@ func (u *Uploader) Upload(ctx context.Context, path string) (*s3manager.UploadOu
 	log.Printf("uploaded %v (%.3f MiB) in %v", base, mib, elapsed.Round(time.Millisecond))
 
 	if u.previousKey != "" { // delete old backup *after* uploading new one
+		// We only delete backups we've personally uploaded. This is both
+		// easier and safer, as it means we won't inadvertently corrupt the
+		// backup we likely restored from.
 		deleteAttempts.Inc()
 		if _, err := u.Client.DeleteObject(ctx, &s3.DeleteObjectInput{
 			Bucket: &u.Bucket,
