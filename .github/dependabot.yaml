@@ -6,5 +6,10 @@ updates:
     interval: weekly
 - package-ecosystem: gomod
   directory: /
+  groups:
+    aws-sdk-go:
+      patterns:
+      - github.com/aws/aws-sdk-go-v2
+      - github.com/aws/aws-sdk-go-v2/*
   schedule:
     interval: weekly
