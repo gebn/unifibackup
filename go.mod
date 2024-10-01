@@ -11,7 +11,7 @@ require (
 	github.com/gebn/go-stamp/v2 v2.2.1
 	github.com/prometheus/client_golang v1.20.4
 	github.com/spf13/cobra v1.8.1
-	go.uber.org/automaxprocs v1.5.3
+	go.uber.org/automaxprocs v1.6.0
 )
 
 require (
