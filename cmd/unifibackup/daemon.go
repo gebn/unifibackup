@@ -8,12 +8,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gebn/unifibackup/v2/cmd/unifibackup/monitor"
-	"github.com/gebn/unifibackup/v2/cmd/unifibackup/uploader"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"github.com/gebn/unifibackup/v2/cmd/unifibackup/monitor"
+	"github.com/gebn/unifibackup/v2/cmd/unifibackup/uploader"
 )
 
 var (
@@ -65,6 +65,7 @@ func daemon(ctx context.Context, metricsListen, backupDir string, uploader *uplo
 		}
 	}()
 
+	log.Printf("waiting for new backups")
 	for {
 		select {
 		case path := <-monitor.Backups:
