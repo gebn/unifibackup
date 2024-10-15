@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/alecthomas/kong"
@@ -32,7 +33,7 @@ var (
 	})
 )
 
-var CLI struct {
+var cli struct {
 	Genmeta struct {
 		Dir string `help:"path of the UniFi autobackup directory." type:"existingdir" default:"/var/lib/unifi/backup/autobackup"`
 	} `cmd:"" help:"Generate autobackup_meta.json for the autobackup directory"`
@@ -47,12 +48,19 @@ var CLI struct {
 }
 
 func main() {
+	if err := app(context.Background()); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func app(ctx context.Context) error {
 	maxprocs.Set() // use the library this way to avoid logging when CPU quota is undefined
 	buildInfo.WithLabelValues(stamp.Version, stamp.Commit).Set(1)
 	buildTime.Set(float64(stamp.Time().UnixNano()) / float64(time.Second))
 
-	ctx := kong.Parse(
-		&CLI,
+	kongCtx := kong.Parse(
+		&cli,
 		kong.Name("unifibackup"),
 		kong.DefaultEnvars("UNIFIBACKUP"),
 		kong.Description("Copies UniFi Controller backups to S3"),
@@ -60,28 +68,25 @@ func main() {
 			"version": stamp.Summary(),
 		},
 	)
-	switch ctx.Command() {
+	switch kongCtx.Command() {
 	case "backup":
-		ctx := context.Background()
 		cfg, err := config.LoadDefaultConfig(ctx,
 			config.WithUseDualStackEndpoint(aws.DualStackEndpointStateEnabled))
 		if err != nil {
-			panic(fmt.Errorf("failed to initialise AWS SDK: %w", err))
+			return fmt.Errorf("failed to initialise AWS SDK: %w", err)
 		}
 		s3client := s3.NewFromConfig(cfg)
-		uploader := uploader.New(s3client, CLI.Backup.Bucket, CLI.Backup.Prefix)
-		err = daemon(ctx, CLI.Backup.Metrics, CLI.Backup.Dir, uploader, CLI.Backup.Timeout)
+		uploader := uploader.New(s3client, cli.Backup.Bucket, cli.Backup.Prefix)
+		err = daemon(ctx, cli.Backup.Metrics, cli.Backup.Dir, uploader, cli.Backup.Timeout)
 		if err != nil {
-			panic(fmt.Errorf("failed to initialize daemon: %w", err))
+			return fmt.Errorf("failed to initialize daemon: %w", err)
 		}
-		break
 	case "genmeta":
-		err := genmeta(CLI.Genmeta.Dir)
-		if err != nil {
-			panic(fmt.Errorf("failed to generate meta: %w", err))
+		if err := genmeta(cli.Genmeta.Dir); err != nil {
+			return fmt.Errorf("failed to generate meta: %w", err)
 		}
-		break
 	default:
-		panic(ctx.Command())
+		return fmt.Errorf("unknown command: %v", kongCtx.Command())
 	}
+	return nil
 }
