@@ -1,20 +1,21 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/gebn/unifibackup/v2/cmd/unifibackup/uploader"
-
+	"github.com/alecthomas/kong"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gebn/go-stamp/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/spf13/cobra"
 	"go.uber.org/automaxprocs/maxprocs"
+
+	"github.com/gebn/unifibackup/v2/cmd/unifibackup/uploader"
 )
 
 var (
@@ -32,73 +33,60 @@ var (
 	})
 )
 
+var cli struct {
+	Genmeta struct {
+		Dir string `help:"path of the UniFi autobackup directory." type:"existingdir" default:"/var/lib/unifi/backup/autobackup"`
+	} `cmd:"" help:"Generate autobackup_meta.json for the autobackup directory"`
+	Version kong.VersionFlag `env:"-"`
+	Backup  struct {
+		Dir     string        `help:"path of the UniFi autobackup directory." type:"existingdir" default:"/var/lib/unifi/backup/autobackup"`
+		Bucket  string        `help:"name of the S3 bucket to upload to." required:""`
+		Prefix  string        `help:"prepended to the backup file name to form the object key." default:"unifi/"`
+		Metrics string        `help:"listen spec for the web server that exposes Prometheus metrics." default:":9184"`
+		Timeout time.Duration `help:"time to allow for upload and delete requests." default:"5m"`
+	} `cmd:"" help:"Copies UniFi Controller backups to S3" default:"withargs"`
+}
+
 func main() {
+	if err := app(context.Background()); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func app(ctx context.Context) error {
 	maxprocs.Set() // use the library this way to avoid logging when CPU quota is undefined
 	buildInfo.WithLabelValues(stamp.Version, stamp.Commit).Set(1)
 	buildTime.Set(float64(stamp.Time().UnixNano()) / float64(time.Second))
 
-	// we can access flags via cmd, but they are untyped; in practice it's
-	// easier to constrain the chaos to this function
-	var (
-		flgBackupDir string
-		flgBucket    string
-		flgPrefix    string
-		flgMetrics   string
-		flgTimeout   time.Duration
+	kongCtx := kong.Parse(
+		&cli,
+		kong.Name("unifibackup"),
+		kong.DefaultEnvars("UNIFIBACKUP"),
+		kong.Description("Copies UniFi Controller backups to S3"),
+		kong.Vars{
+			"version": stamp.Summary(),
+		},
 	)
-
-	rootCmd := &cobra.Command{
-		Use:          "unifibackup --bucket unifi-backups",
-		Short:        "Copies UniFi Controller backups to S3",
-		Version:      stamp.Summary(),
-		SilenceUsage: true,
-		Args:         cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			ctx := cmd.Context()
-			cfg, err := config.LoadDefaultConfig(ctx,
-				config.WithUseDualStackEndpoint(aws.DualStackEndpointStateEnabled))
-			if err != nil {
-				return fmt.Errorf("failed to initialise AWS SDK: %w", err)
-			}
-			s3client := s3.NewFromConfig(cfg)
-			uploader := uploader.New(s3client, flgBucket, flgPrefix)
-			return daemon(ctx, flgMetrics, flgBackupDir, uploader, flgTimeout)
-		},
+	switch kongCtx.Command() {
+	case "backup":
+		cfg, err := config.LoadDefaultConfig(ctx,
+			config.WithUseDualStackEndpoint(aws.DualStackEndpointStateEnabled))
+		if err != nil {
+			return fmt.Errorf("failed to initialise AWS SDK: %w", err)
+		}
+		s3client := s3.NewFromConfig(cfg)
+		uploader := uploader.New(s3client, cli.Backup.Bucket, cli.Backup.Prefix)
+		err = daemon(ctx, cli.Backup.Metrics, cli.Backup.Dir, uploader, cli.Backup.Timeout)
+		if err != nil {
+			return fmt.Errorf("failed to initialize daemon: %w", err)
+		}
+	case "genmeta":
+		if err := genmeta(cli.Genmeta.Dir); err != nil {
+			return fmt.Errorf("failed to generate meta: %w", err)
+		}
+	default:
+		return fmt.Errorf("unknown command: %v", kongCtx.Command())
 	}
-	rootCmd.SetVersionTemplate("{{.Version}}\n")
-	rootCmd.PersistentFlags().StringVar(&flgBackupDir,
-		"dir",
-		"/var/lib/unifi/backup/autobackup",
-		"path of the UniFi autobackup directory")
-	rootCmd.Flags().StringVar(&flgBucket,
-		"bucket",
-		"", // in hindsight, this should not have been a flag
-		"name of the S3 bucket to upload to (requird)")
-	rootCmd.MarkFlagRequired("bucket")
-	rootCmd.Flags().StringVar(&flgPrefix,
-		"prefix",
-		"unifi/",
-		"prepended to the backup file name to form the object key")
-	rootCmd.Flags().StringVar(&flgMetrics,
-		"metrics",
-		":9184",
-		"listen spec for the web server that exposes Prometheus metrics")
-	rootCmd.Flags().DurationVar(&flgTimeout,
-		"timeout",
-		5*time.Minute,
-		"time to allow for upload and delete requests")
-
-	rootCmd.AddCommand(&cobra.Command{
-		Use:   "genmeta",
-		Short: "Generate autobackup_meta.json for the autobackup directory",
-		Args:  cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			return genmeta(flgBackupDir)
-		},
-	})
-
-	if err := rootCmd.Execute(); err != nil {
-		// error already printed (SilenceErrors == false)
-		os.Exit(1)
-	}
+	return nil
 }
