@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.0
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gebn/go-stamp/v2 v2.2.1
-	github.com/prometheus/client_golang v1.21.0
+	github.com/prometheus/client_golang v1.21.1
 	github.com/spf13/cobra v1.9.1
 	go.uber.org/automaxprocs v1.6.0
 )
