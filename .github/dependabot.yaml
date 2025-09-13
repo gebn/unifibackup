@@ -3,7 +3,7 @@ updates:
 - package-ecosystem: github-actions
   directory: /
   schedule:
-    interval: weekly
+    interval: quarterly
 - package-ecosystem: gomod
   directory: /
   groups:
@@ -12,4 +12,4 @@ updates:
       - github.com/aws/aws-sdk-go-v2
       - github.com/aws/aws-sdk-go-v2/*
   schedule:
-    interval: monthly
+    interval: quarterly
